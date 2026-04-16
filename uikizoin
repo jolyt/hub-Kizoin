@@ -20,14 +20,95 @@ local C = {
     white = Color3.fromRGB(255, 255, 255),
 }
 
-local function tp(ins, pos, time)
-    game:GetService("TweenService"):Create(ins, TweenInfo.new(time, Enum.EasingStyle.Quart, Enum.EasingDirection.InOut), {Position = pos}):Play()
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local Debris = game:GetService("Debris")
+local Lighting = game:GetService("Lighting")
+
+local function tp(ins, pos, time, style, dir)
+    TweenService:Create(
+        ins,
+        TweenInfo.new(time, style or Enum.EasingStyle.Quart, dir or Enum.EasingDirection.InOut),
+        {Position = pos}
+    ):Play()
 end
 
 local function tween(ins, props, time, style, dir)
-    style = style or Enum.EasingStyle.Quart
-    dir = dir or Enum.EasingDirection.InOut
-    game:GetService("TweenService"):Create(ins, TweenInfo.new(time, style, dir), props):Play()
+    TweenService:Create(
+        ins,
+        TweenInfo.new(time, style or Enum.EasingStyle.Quart, dir or Enum.EasingDirection.InOut),
+        props
+    ):Play()
+end
+
+local function spring(ins, props, time)
+    tween(ins, props, time or 0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+end
+
+local function pulseStroke(stroke, minT, maxT, speed)
+    task.spawn(function()
+        local grow = true
+        while stroke and stroke.Parent do
+            tween(stroke, {Thickness = grow and maxT or minT}, speed or 0.8, Enum.EasingStyle.Sine)
+            grow = not grow
+            task.wait(speed or 0.8)
+        end
+    end)
+end
+
+local function attachShine(gui)
+    local shineHolder = Instance.new("Frame")
+    shineHolder.Name = "ShineHolder"
+    shineHolder.Parent = gui
+    shineHolder.BackgroundTransparency = 1
+    shineHolder.ClipsDescendants = true
+    shineHolder.Size = UDim2.fromScale(1, 1)
+    shineHolder.ZIndex = gui.ZIndex + 1
+    local shine = Instance.new("Frame")
+    shine.Parent = shineHolder
+    shine.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    shine.BackgroundTransparency = 0.86
+    shine.BorderSizePixel = 0
+    shine.Position = UDim2.new(-1.2, 0, -0.2, 0)
+    shine.Size = UDim2.new(0.35, 0, 1.4, 0)
+    shine.Rotation = 16
+    shine.ZIndex = gui.ZIndex + 1
+    local grad = Instance.new("UIGradient")
+    grad.Parent = shine
+    grad.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)),
+    }
+    grad.Transparency = NumberSequence.new{
+        NumberSequenceKeypoint.new(0, 1),
+        NumberSequenceKeypoint.new(0.5, 0.15),
+        NumberSequenceKeypoint.new(1, 1),
+    }
+    gui.MouseEnter:Connect(function()
+        shine.Position = UDim2.new(-1.2, 0, -0.2, 0)
+        tween(shine, {Position = UDim2.new(1.2, 0, -0.2, 0)}, 0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    end)
+end
+
+local blur = Lighting:FindFirstChild("KizoinHubBlur")
+if not blur then
+    blur = Instance.new("BlurEffect")
+    blur.Name = "KizoinHubBlur"
+    blur.Size = 0
+    blur.Enabled = false
+    blur.Parent = Lighting
+end
+local function setBlur(amount, time)
+    blur.Enabled = true
+    tween(blur, {Size = amount}, time or 0.2, Enum.EasingStyle.Quart)
+    if amount <= 0 then
+        task.delay((time or 0.2) + 0.03, function()
+            if blur and blur.Parent then
+                blur.Enabled = false
+            end
+        end)
+    end
 end
 
 function lib:init(ti, dosplash, visiblekey, deleteprevious)
@@ -284,6 +365,75 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
     separator.Position = UDim2.new(0.358, 0, 0.05, 0)
     separator.Size = UDim2.new(0, 1, 0.9, 0)
 
+    -- Ambient premium layers
+    local orb1 = Instance.new("ImageLabel")
+    orb1.Name = "Orb1"
+    orb1.Parent = main
+    orb1.AnchorPoint = Vector2.new(0.5, 0.5)
+    orb1.BackgroundTransparency = 1
+    orb1.Position = UDim2.new(0.88, 0, 0.18, 0)
+    orb1.Size = UDim2.new(0, 250, 0, 250)
+    orb1.Image = "rbxassetid://313486536"
+    orb1.ImageColor3 = Color3.fromRGB(140, 80, 220)
+    orb1.ImageTransparency = 0.82
+    orb1.ZIndex = 0
+    local orb2 = Instance.new("ImageLabel")
+    orb2.Name = "Orb2"
+    orb2.Parent = main
+    orb2.AnchorPoint = Vector2.new(0.5, 0.5)
+    orb2.BackgroundTransparency = 1
+    orb2.Position = UDim2.new(0.74, 0, 0.92, 0)
+    orb2.Size = UDim2.new(0, 330, 0, 330)
+    orb2.Image = "rbxassetid://313486536"
+    orb2.ImageColor3 = Color3.fromRGB(90, 35, 170)
+    orb2.ImageTransparency = 0.88
+    orb2.ZIndex = 0
+    local emblem = Instance.new("ImageLabel")
+    emblem.Name = "Emblem"
+    emblem.Parent = workarea
+    emblem.AnchorPoint = Vector2.new(1, 0)
+    emblem.BackgroundTransparency = 1
+    emblem.Position = UDim2.new(1, -16, 0, 14)
+    emblem.Size = UDim2.new(0, 82, 0, 82)
+    emblem.Image = "rbxassetid://12621719043"
+    emblem.ImageColor3 = C.accent
+    emblem.ImageTransparency = 0.72
+    emblem.ZIndex = 1
+    local vignette = Instance.new("ImageLabel")
+    vignette.Parent = workarea
+    vignette.AnchorPoint = Vector2.new(0.5, 0.5)
+    vignette.BackgroundTransparency = 1
+    vignette.Position = UDim2.new(0.5, 0, 0.55, 0)
+    vignette.Size = UDim2.new(1.35, 0, 1.25, 0)
+    vignette.Image = "rbxassetid://8992230677"
+    vignette.ImageColor3 = C.accentDark
+    vignette.ImageTransparency = 0.72
+    vignette.ScaleType = Enum.ScaleType.Slice
+    vignette.SliceCenter = Rect.new(99, 99, 99, 99)
+    vignette.ZIndex = 0
+
+    local heroArt = Instance.new("ImageLabel")
+    heroArt.Name = "HeroArt"
+    heroArt.Parent = workarea
+    heroArt.AnchorPoint = Vector2.new(1, 1)
+    heroArt.BackgroundTransparency = 1
+    heroArt.Position = UDim2.new(1, -8, 1, -8)
+    heroArt.Size = UDim2.new(0, 210, 0, 290)
+    heroArt.Image = "rbxassetid://12621719043"
+    heroArt.ImageTransparency = 0.82
+    heroArt.ScaleType = Enum.ScaleType.Fit
+    heroArt.ZIndex = 1
+    local heroGlow = Instance.new("ImageLabel")
+    heroGlow.Parent = heroArt
+    heroGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+    heroGlow.BackgroundTransparency = 1
+    heroGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
+    heroGlow.Size = UDim2.new(1.35, 0, 1.2, 0)
+    heroGlow.Image = "rbxassetid://313486536"
+    heroGlow.ImageColor3 = C.accent
+    heroGlow.ImageTransparency = 0.84
+    heroGlow.ZIndex = 0
+
     -- SEARCHBAR
     local search = Instance.new("Frame")
     search.Name = "search"
@@ -357,10 +507,13 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
     sidebarLayout.Padding = UDim.new(0, 5)
 
     -- Search filter
-    game:GetService("RunService"):BindToRenderStep("kizoin_search", 1, function()
+    local renderTag = "kizoin_search_" .. tostring(math.random(100000, 999999))
+    RunService:BindToRenderStep(renderTag, 1, function()
         if not searchtextbox:IsFocused() then
             for _, v in next, sidebar:GetChildren() do
-                if v:IsA("TextButton") then v.Visible = true end
+                if v:IsA("TextButton") then
+                    v.Visible = true
+                end
             end
         end
         local InputText = string.upper(searchtextbox.Text)
@@ -373,6 +526,11 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
                 end
             end
         end
+    end)
+    scrgui.Destroying:Connect(function()
+        pcall(function()
+            RunService:UnbindFromRenderStep(renderTag)
+        end)
     end)
 
     -- MACOS BUTTONS
@@ -452,6 +610,21 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
         ColorSequenceKeypoint.new(0, Color3.fromRGB(220, 180, 255)),
         ColorSequenceKeypoint.new(1, Color3.fromRGB(140, 80, 220))
     }
+
+    task.spawn(function()
+        local t0 = tick()
+        while main.Parent do
+            local t = tick() - t0
+            orb1.Rotation = (t * 6) % 360
+            orb2.Rotation = -(t * 4) % 360
+            orb1.Position = UDim2.new(0.88, math.cos(t * 0.8) * 10, 0.18, math.sin(t * 1.0) * 8)
+            orb2.Position = UDim2.new(0.74, math.sin(t * 0.55) * 14, 0.92, math.cos(t * 0.7) * 10)
+            emblem.Rotation = math.sin(t * 0.9) * 6
+            waBanner.ImageTransparency = 0.48 + ((math.sin(t * 1.2) + 1) * 0.06)
+            mainStroke.Color = C.accentDark:Lerp(C.accent, (math.sin(t * 1.1) + 1) / 2)
+            RunService.RenderStepped:Wait()
+        end
+    end)
 
     -- NOTIF 1
     local notif = Instance.new("Frame")
@@ -627,11 +800,34 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
         end)
     end
 
+    local function revealModal(frame)
+        frame.Visible = true
+        frame.Position = UDim2.new(0.5, 0, 0.56, 0)
+        frame.Size = UDim2.new(0, 286, 0, 344)
+        setBlur(18, 0.18)
+        spring(frame, {
+            Position = UDim2.new(0.5, 0, 0.5, 0),
+            Size = UDim2.new(0, 304, 0, 362)
+        }, 0.22)
+    end
+    local function hideModal(frame)
+        setBlur(0, 0.16)
+        tween(frame, {Position = UDim2.new(0.5, 0, 0.56, 0)}, 0.14)
+        task.delay(0.15, function()
+            if frame and frame.Parent then
+                frame.Visible = false
+            end
+        end)
+    end
+    pulseStroke(mainStroke, 1.5, 2.2, 1.1)
+
     -- Entrée animée
-    tp(main, UDim2.new(0.5, 0, 0.5, 0), 1)
+    main.Position = UDim2.new(0.5, 0, 1.7, 0)
+    spring(main, {Position = UDim2.new(0.5, 0, 0.5, 0)}, 0.85)
 
     local window = {}
     local con1, con2
+    local currentWorkarea = nil
 
     function window:ToggleVisible()
         if dbcooper then return end
@@ -672,7 +868,7 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
     function window:TempNotify(text1, text2, icon)
         for _, v in next, scrgui:GetChildren() do
             if v.Name == "tempnotif" then
-                v.Position += UDim2.new(0, 0, 0, 130)
+                tp(v, v.Position + UDim2.new(0, 0, 0, 130), 0.22)
             end
         end
 
@@ -682,7 +878,7 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
         tempnotif.AnchorPoint = Vector2.new(0.5, 0.5)
         tempnotif.BackgroundColor3 = Color3.fromRGB(12, 6, 20)
         tempnotif.BackgroundTransparency = 0.05
-        tempnotif.Position = UDim2.new(1, -250, 0.079, 0)
+        tempnotif.Position = UDim2.new(1, 260, 0.079, 0)
         tempnotif.Size = UDim2.new(0, 447, 0, 117)
         tempnotif.ZIndex = 4
 
@@ -755,7 +951,14 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
         tshadow.ImageColor3 = C.accent
         tshadow.ImageTransparency = 0.6
 
-        game:GetService("Debris"):AddItem(tempnotif, 5)
+        pulseStroke(tnotifStroke, 1, 2.4, 0.65)
+        tp(tempnotif, UDim2.new(1, -250, 0.079, 0), 0.42, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
+        task.delay(4.4, function()
+            if tempnotif and tempnotif.Parent then
+                tp(tempnotif, tempnotif.Position + UDim2.new(0, 520, 0, 0), 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
+                Debris:AddItem(tempnotif, 0.35)
+            end
+        end)
     end
 
     function window:Notify(txt1, txt2, b1, icohn, callback)
@@ -763,15 +966,22 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
         notiftitle.Text = txt1
         notiftext.Text = txt2
         notificon.Image = icohn
-        notif.Visible = true
         notifbutton1.Text = b1
-        if callback then
-            con1 = notifbutton1.MouseButton1Click:Connect(function()
-                con1:Disconnect()
-                callback()
-                notif.Visible = false
-            end)
+        revealModal(notif)
+        if con1 then
+            con1:Disconnect()
+            con1 = nil
         end
+        con1 = notifbutton1.MouseButton1Click:Connect(function()
+            if con1 then
+                con1:Disconnect()
+                con1 = nil
+            end
+            if callback then
+                callback()
+            end
+            hideModal(notif)
+        end)
     end
 
     function window:Notify2(txt1, txt2, b1, b2, icohn, callback, callback2)
@@ -779,23 +989,33 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
         notif2title.Text = txt1
         notif2text.Text = txt2
         notif2icon.Image = icohn
-        notif2.Visible = true
         notif2button1.Text = b1
         notif2button2.Text = b2
-        if callback and callback2 then
-            con1 = notif2button1.MouseButton1Click:Connect(function()
-                con1:Disconnect()
-                con2:Disconnect()
-                callback()
-                notif2.Visible = false
-            end)
-            con2 = notif2button2.MouseButton1Click:Connect(function()
-                con1:Disconnect()
-                con2:Disconnect()
-                callback2()
-                notif2.Visible = false
-            end)
+        revealModal(notif2)
+        if con1 then
+            con1:Disconnect()
+            con1 = nil
         end
+        if con2 then
+            con2:Disconnect()
+            con2 = nil
+        end
+        con1 = notif2button1.MouseButton1Click:Connect(function()
+            if con1 then con1:Disconnect() con1 = nil end
+            if con2 then con2:Disconnect() con2 = nil end
+            if callback then
+                callback()
+            end
+            hideModal(notif2)
+        end)
+        con2 = notif2button2.MouseButton1Click:Connect(function()
+            if con1 then con1:Disconnect() con1 = nil end
+            if con2 then con2:Disconnect() con2 = nil end
+            if callback2 then
+                callback2()
+            end
+            hideModal(notif2)
+        end)
     end
 
     function window:Divider(name)
@@ -828,6 +1048,22 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
 
         Instance.new("UICorner", sideBtn).CornerRadius = UDim.new(0, 9)
         table.insert(sections, sideBtn)
+        sideBtn.ClipsDescendants = true
+        local sideStroke = Instance.new("UIStroke", sideBtn)
+        sideStroke.Color = C.accent
+        sideStroke.Thickness = 1
+        sideStroke.Transparency = 1
+        local indicator = Instance.new("Frame")
+        indicator.Name = "Indicator"
+        indicator.Parent = sideBtn
+        indicator.AnchorPoint = Vector2.new(0, 0.5)
+        indicator.BackgroundColor3 = C.white
+        indicator.BorderSizePixel = 0
+        indicator.Position = UDim2.new(0, 8, 0.5, 0)
+        indicator.Size = UDim2.new(0, 0, 0, 20)
+        indicator.ZIndex = 3
+        Instance.new("UICorner", indicator).CornerRadius = UDim.new(1, 0)
+        attachShine(sideBtn)
 
         -- Hover sidebar
         sideBtn.MouseEnter:Connect(function()
@@ -867,15 +1103,45 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
 
         function sec:Select()
             for _, v in next, sections do
-                v.BackgroundTransparency = 1
-                v.TextColor3 = C.subtext
+                tween(v, {
+                    BackgroundTransparency = 1,
+                    TextColor3 = C.subtext
+                }, 0.18)
+                local ind = v:FindFirstChild("Indicator")
+                if ind then
+                    tween(ind, {Size = UDim2.new(0, 0, 0, 20)}, 0.18)
+                end
+                local st = v:FindFirstChildOfClass("UIStroke")
+                if st then
+                    tween(st, {Transparency = 1}, 0.18)
+                end
             end
-            sideBtn.BackgroundTransparency = 0
-            sideBtn.TextColor3 = C.white
-            for _, v in next, workareas do
-                v.Visible = false
+            tween(sideBtn, {
+                BackgroundTransparency = 0.08,
+                TextColor3 = C.white
+            }, 0.18)
+            tween(indicator, {Size = UDim2.new(0, 4, 0, 20)}, 0.18)
+            tween(sideStroke, {Transparency = 0.35}, 0.18)
+            if currentWorkarea and currentWorkarea ~= workareamain then
+                tween(currentWorkarea, {
+                    Position = UDim2.new(0, -20, 0.096, 0),
+                    ScrollBarImageTransparency = 1
+                }, 0.18)
+                task.delay(0.18, function()
+                    if currentWorkarea and currentWorkarea ~= workareamain then
+                        currentWorkarea.Visible = false
+                        currentWorkarea.Position = UDim2.new(0.039, 0, 0.096, 0)
+                    end
+                end)
             end
+            workareamain.Position = UDim2.new(0.08, 0, 0.096, 0)
+            workareamain.ScrollBarImageTransparency = 1
             workareamain.Visible = true
+            tween(workareamain, {
+                Position = UDim2.new(0.039, 0, 0.096, 0),
+                ScrollBarImageTransparency = 0
+            }, 0.22)
+            currentWorkarea = workareamain
         end
 
         function sec:Divider(name)
@@ -903,7 +1169,7 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
             local btn = Instance.new("TextButton")
             btn.Parent = workareamain
             btn.BackgroundColor3 = C.button
-            btn.Size = UDim2.new(0, 418, 0, 40)
+            btn.Size = UDim2.new(0, 418, 0, 42)
             btn.ZIndex = 2
             btn.Font = Enum.Font.GothamBold
             btn.Text = name
@@ -911,52 +1177,63 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
             btn.TextSize = 18
             btn.AutoButtonColor = false
             btn.ClipsDescendants = true
-
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 9)
+            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
             local btnStroke = Instance.new("UIStroke", btn)
             btnStroke.Color = C.accentDark
             btnStroke.Thickness = 1
-
+            local btnScale = Instance.new("UIScale", btn)
+            btnScale.Scale = 1
+            local glow = Instance.new("ImageLabel")
+            glow.Parent = btn
+            glow.AnchorPoint = Vector2.new(0.5, 0.5)
+            glow.BackgroundTransparency = 1
+            glow.Position = UDim2.new(0.5, 0, 0.5, 0)
+            glow.Size = UDim2.new(1.15, 0, 2.2, 0)
+            glow.Image = "rbxassetid://313486536"
+            glow.ImageColor3 = C.accent
+            glow.ImageTransparency = 0.92
+            glow.ZIndex = 1
+            attachShine(btn)
             btn.MouseEnter:Connect(function()
-                tween(btn, {BackgroundColor3 = C.accentDark}, 0.2)
-                tween(btnStroke, {Color = C.accent}, 0.2)
+                tween(btn, {BackgroundColor3 = C.accentDark}, 0.18)
+                tween(btnStroke, {Color = C.accent}, 0.18)
+                tween(glow, {ImageTransparency = 0.82}, 0.18)
             end)
             btn.MouseLeave:Connect(function()
-                tween(btn, {BackgroundColor3 = C.button}, 0.2)
-                tween(btnStroke, {Color = C.accentDark}, 0.2)
+                tween(btn, {BackgroundColor3 = C.button}, 0.18)
+                tween(btnStroke, {Color = C.accentDark}, 0.18)
+                tween(glow, {ImageTransparency = 0.92}, 0.18)
+                spring(btnScale, {Scale = 1}, 0.12)
             end)
-
+            btn.MouseButton1Down:Connect(function()
+                tween(btnScale, {Scale = 0.985}, 0.06, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            end)
+            btn.MouseButton1Up:Connect(function()
+                spring(btnScale, {Scale = 1}, 0.14)
+            end)
             if callback then
                 btn.MouseButton1Click:Connect(function()
                     local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
                     local relativeX = Mouse.X - btn.AbsolutePosition.X
                     local relativeY = Mouse.Y - btn.AbsolutePosition.Y
-                    
                     local circle = Instance.new("Frame")
                     circle.Parent = btn
                     circle.BackgroundColor3 = C.white
-                    circle.BackgroundTransparency = 0.8
+                    circle.BackgroundTransparency = 0.82
                     circle.BorderSizePixel = 0
                     circle.AnchorPoint = Vector2.new(0.5, 0.5)
                     circle.Position = UDim2.new(0, relativeX, 0, relativeY)
                     circle.Size = UDim2.new(0, 0, 0, 0)
-                    circle.ZIndex = btn.ZIndex + 1
-                    
+                    circle.ZIndex = btn.ZIndex + 2
                     Instance.new("UICorner", circle).CornerRadius = UDim.new(1, 0)
-                    
-                    local t = game:GetService("TweenService"):Create(circle, TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-                        Size = UDim2.new(0, btn.AbsoluteSize.X * 1.5, 0, btn.AbsoluteSize.X * 1.5),
+                    TweenService:Create(circle, TweenInfo.new(0.55, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                        Size = UDim2.new(0, btn.AbsoluteSize.X * 1.6, 0, btn.AbsoluteSize.X * 1.6),
                         BackgroundTransparency = 1
-                    })
-                    t:Play()
-                    game:GetService("Debris"):AddItem(circle, 1)
-
-                    coroutine.wrap(function()
-                        tween(btn, {TextTransparency = 0.5}, 0.06)
-                        task.wait(0.06)
-                        tween(btn, {TextTransparency = 0}, 0.06)
-                    end)()
-
+                    }):Play()
+                    Debris:AddItem(circle, 0.65)
+                    tween(btn, {TextTransparency = 0.4}, 0.05)
+                    task.wait(0.05)
+                    tween(btn, {TextTransparency = 0}, 0.08)
                     callback()
                 end)
             end
