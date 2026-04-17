@@ -1,4 +1,4 @@
--- KIZOIN HUB | The Eminence in Shadow Theme v3.1 FIXED
+-- KIZOIN HUB | The Eminence in Shadow Theme v3.1
 local lib = {}
 local sections = {}
 local workareas = {}
@@ -15,8 +15,8 @@ local C = {
     white      = Color3.fromRGB(255, 255, 255),
 }
 
-local RAW_LOGO_ID = "128582796221563"
-local POPUP_SND   = "rbxassetid://109988746843206"
+local LOGO_ID   = "rbxassetid://128582796221563"
+local POPUP_SND = "rbxassetid://109988746843206"
 
 local TweenService = game:GetService("TweenService")
 local RunService   = game:GetService("RunService")
@@ -24,66 +24,28 @@ local Debris       = game:GetService("Debris")
 local Lighting     = game:GetService("Lighting")
 local SoundService = game:GetService("SoundService")
 
-local function cleanAssetId(id)
-    return tostring(id or ""):gsub("%D", "")
-end
-
-local function toRobloxImage(id)
-    local cleaned = cleanAssetId(id)
-    if cleaned == "" then
-        return ""
-    end
-    return ("rbxthumb://type=Asset&id=%s&w=420&h=420"):format(cleaned)
-end
-
-local LOGO_ID = toRobloxImage(RAW_LOGO_ID)
-
-local function applyLogo(img, id, color, transparency)
-    img.BackgroundTransparency = 1
-    img.Image = toRobloxImage(id or RAW_LOGO_ID)
-    img.ScaleType = Enum.ScaleType.Fit
-    if color then
-        img.ImageColor3 = color
-    end
-    if transparency ~= nil then
-        img.ImageTransparency = transparency
-    end
-end
-
 local function playSound(id, vol, pitch)
     pcall(function()
         local s = Instance.new("Sound")
-        s.SoundId = id
-        s.Volume = vol or 0.5
-        s.PlaybackSpeed = pitch or 1
-        s.Parent = SoundService
-        s:Play()
+        s.SoundId = id; s.Volume = vol or 0.5; s.PlaybackSpeed = pitch or 1
+        s.Parent = SoundService; s:Play()
         Debris:AddItem(s, 3)
     end)
 end
 
 local function tween(ins, props, time, style, dir)
     pcall(function()
-        TweenService:Create(
-            ins,
-            TweenInfo.new(
-                time or 0.2,
-                style or Enum.EasingStyle.Quart,
-                dir or Enum.EasingDirection.InOut
-            ),
-            props
-        ):Play()
+        TweenService:Create(ins, TweenInfo.new(time or 0.2,
+            style or Enum.EasingStyle.Quart,
+            dir   or Enum.EasingDirection.InOut), props):Play()
     end)
 end
-
 local function tp(ins, pos, time, style, dir)
     tween(ins, {Position = pos}, time, style, dir)
 end
-
 local function spring(ins, props, time)
     tween(ins, props, time or 0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
 end
-
 local function pulseStroke(stroke, minT, maxT, spd)
     task.spawn(function()
         local grow = true
@@ -94,34 +56,25 @@ local function pulseStroke(stroke, minT, maxT, spd)
         end
     end)
 end
-
 local function attachShine(gui)
     pcall(function()
         local sh = Instance.new("Frame", gui)
-        sh.BackgroundTransparency = 1
-        sh.ClipsDescendants = true
-        sh.Size = UDim2.fromScale(1, 1)
-        sh.ZIndex = gui.ZIndex + 1
-
+        sh.BackgroundTransparency = 1; sh.ClipsDescendants = true
+        sh.Size = UDim2.fromScale(1,1); sh.ZIndex = gui.ZIndex + 1
         local shine = Instance.new("Frame", sh)
-        shine.BackgroundColor3 = C.white
-        shine.BackgroundTransparency = 0.86
-        shine.BorderSizePixel = 0
-        shine.Position = UDim2.new(-1.2, 0, -0.2, 0)
-        shine.Size = UDim2.new(0.35, 0, 1.4, 0)
-        shine.Rotation = 16
+        shine.BackgroundColor3 = C.white; shine.BackgroundTransparency = 0.86
+        shine.BorderSizePixel = 0; shine.Position = UDim2.new(-1.2,0,-0.2,0)
+        shine.Size = UDim2.new(0.35,0,1.4,0); shine.Rotation = 16
         shine.ZIndex = gui.ZIndex + 1
-
         local g = Instance.new("UIGradient", shine)
         g.Transparency = NumberSequence.new{
-            NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(0.5, 0.15),
-            NumberSequenceKeypoint.new(1, 1)
+            NumberSequenceKeypoint.new(0,1),
+            NumberSequenceKeypoint.new(0.5,0.15),
+            NumberSequenceKeypoint.new(1,1)
         }
-
         gui.MouseEnter:Connect(function()
-            shine.Position = UDim2.new(-1.2, 0, -0.2, 0)
-            tween(shine, {Position = UDim2.new(1.2, 0, -0.2, 0)}, 0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            shine.Position = UDim2.new(-1.2,0,-0.2,0)
+            tween(shine,{Position=UDim2.new(1.2,0,-0.2,0)},0.55,Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
         end)
     end)
 end
@@ -129,232 +82,204 @@ end
 local blur = Lighting:FindFirstChild("KizoinHubBlur")
 if not blur then
     blur = Instance.new("BlurEffect")
-    blur.Name = "KizoinHubBlur"
-    blur.Size = 0
-    blur.Enabled = false
-    blur.Parent = Lighting
+    blur.Name = "KizoinHubBlur"; blur.Size = 0; blur.Enabled = false; blur.Parent = Lighting
 end
-
 local function setBlur(amount, time)
     pcall(function()
         blur.Enabled = true
         tween(blur, {Size = amount}, time or 0.2, Enum.EasingStyle.Quart)
         if amount <= 0 then
-            task.delay((time or 0.2) + 0.05, function()
-                if blur and blur.Parent then
-                    blur.Enabled = false
-                end
+            task.delay((time or 0.2)+0.05, function()
+                if blur and blur.Parent then blur.Enabled = false end
             end)
         end
     end)
 end
 
+-- LOADER CUSTOM (remplace le GIF)
 local function createLoader(parent)
     local holder = Instance.new("Frame", parent)
     holder.Name = "LoaderHolder"
-    holder.AnchorPoint = Vector2.new(0.5, 0.5)
+    holder.AnchorPoint = Vector2.new(0.5,0.5)
     holder.BackgroundTransparency = 1
-    holder.Position = UDim2.new(0.5, 0, 0.38, 0)
-    holder.Size = UDim2.new(0, 160, 0, 160)
+    holder.Position = UDim2.new(0.5,0,0.38,0)
+    holder.Size = UDim2.new(0,160,0,160)
     holder.ZIndex = 43
 
+    -- Cercle de fond
     local ring1 = Instance.new("ImageLabel", holder)
-    ring1.AnchorPoint = Vector2.new(0.5, 0.5)
+    ring1.AnchorPoint = Vector2.new(0.5,0.5)
     ring1.BackgroundTransparency = 1
-    ring1.Position = UDim2.new(0.5, 0, 0.5, 0)
-    ring1.Size = UDim2.new(0, 150, 0, 150)
+    ring1.Position = UDim2.new(0.5,0,0.5,0)
+    ring1.Size = UDim2.new(0,150,0,150)
     ring1.Image = "rbxassetid://4287594708"
     ring1.ImageColor3 = C.accent
     ring1.ImageTransparency = 0.1
     ring1.ZIndex = 43
 
     local ring2 = Instance.new("ImageLabel", holder)
-    ring2.AnchorPoint = Vector2.new(0.5, 0.5)
+    ring2.AnchorPoint = Vector2.new(0.5,0.5)
     ring2.BackgroundTransparency = 1
-    ring2.Position = UDim2.new(0.5, 0, 0.5, 0)
-    ring2.Size = UDim2.new(0, 120, 0, 120)
+    ring2.Position = UDim2.new(0.5,0,0.5,0)
+    ring2.Size = UDim2.new(0,120,0,120)
     ring2.Image = "rbxassetid://4287594708"
     ring2.ImageColor3 = C.accentDark
     ring2.ImageTransparency = 0.2
     ring2.ZIndex = 43
 
     local ring3 = Instance.new("ImageLabel", holder)
-    ring3.AnchorPoint = Vector2.new(0.5, 0.5)
+    ring3.AnchorPoint = Vector2.new(0.5,0.5)
     ring3.BackgroundTransparency = 1
-    ring3.Position = UDim2.new(0.5, 0, 0.5, 0)
-    ring3.Size = UDim2.new(0, 88, 0, 88)
+    ring3.Position = UDim2.new(0.5,0,0.5,0)
+    ring3.Size = UDim2.new(0,88,0,88)
     ring3.Image = "rbxassetid://4287594708"
-    ring3.ImageColor3 = Color3.fromRGB(200, 100, 255)
+    ring3.ImageColor3 = Color3.fromRGB(200,100,255)
     ring3.ImageTransparency = 0.3
     ring3.ZIndex = 43
 
+    -- Logo K au centre
     local centerLogo = Instance.new("ImageLabel", holder)
-    centerLogo.AnchorPoint = Vector2.new(0.5, 0.5)
-    centerLogo.Position = UDim2.new(0.5, 0, 0.5, 0)
-    centerLogo.Size = UDim2.new(0, 54, 0, 54)
+    centerLogo.AnchorPoint = Vector2.new(0.5,0.5)
+    centerLogo.BackgroundTransparency = 1
+    centerLogo.Position = UDim2.new(0.5,0,0.5,0)
+    centerLogo.Size = UDim2.new(0,54,0,54)
+    centerLogo.Image = LOGO_ID
+    centerLogo.ScaleType = Enum.ScaleType.Fit
     centerLogo.ZIndex = 44
-    applyLogo(centerLogo, RAW_LOGO_ID)
 
+    -- Particules orbitales
     local dots = {}
     for i = 1, 6 do
         local dot = Instance.new("Frame", holder)
-        dot.AnchorPoint = Vector2.new(0.5, 0.5)
-        dot.BackgroundColor3 = i % 2 == 0 and C.accent or Color3.fromRGB(220, 120, 255)
+        dot.AnchorPoint = Vector2.new(0.5,0.5)
+        dot.BackgroundColor3 = i % 2 == 0 and C.accent or Color3.fromRGB(220,120,255)
         dot.BorderSizePixel = 0
-        dot.Size = UDim2.new(0, i % 3 == 0 and 6 or 4, 0, i % 3 == 0 and 6 or 4)
-        dot.Position = UDim2.new(0.5, 0, 0.5, 0)
+        dot.Size = UDim2.new(0, i%3==0 and 6 or 4, 0, i%3==0 and 6 or 4)
+        dot.Position = UDim2.new(0.5,0,0.5,0)
         dot.ZIndex = 44
-        Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+        Instance.new("UICorner", dot).CornerRadius = UDim.new(1,0)
         dots[i] = dot
     end
 
+    -- Glow central
     local glow = Instance.new("ImageLabel", holder)
-    glow.AnchorPoint = Vector2.new(0.5, 0.5)
+    glow.AnchorPoint = Vector2.new(0.5,0.5)
     glow.BackgroundTransparency = 1
-    glow.Position = UDim2.new(0.5, 0, 0.5, 0)
-    glow.Size = UDim2.new(0, 200, 0, 200)
+    glow.Position = UDim2.new(0.5,0,0.5,0)
+    glow.Size = UDim2.new(0,200,0,200)
     glow.Image = "rbxassetid://313486536"
     glow.ImageColor3 = C.accent
     glow.ImageTransparency = 0.55
     glow.ZIndex = 41
 
+    -- Barre de chargement
     local barBg = Instance.new("Frame", holder)
-    barBg.AnchorPoint = Vector2.new(0.5, 0)
-    barBg.BackgroundColor3 = Color3.fromRGB(30, 15, 50)
+    barBg.AnchorPoint = Vector2.new(0.5,0)
+    barBg.BackgroundColor3 = Color3.fromRGB(30,15,50)
     barBg.BorderSizePixel = 0
-    barBg.Position = UDim2.new(0.5, 0, 0.96, 0)
-    barBg.Size = UDim2.new(0, 140, 0, 5)
-    Instance.new("UICorner", barBg).CornerRadius = UDim.new(1, 0)
+    barBg.Position = UDim2.new(0.5,0,0.96,0)
+    barBg.Size = UDim2.new(0,140,0,5)
+    Instance.new("UICorner", barBg).CornerRadius = UDim.new(1,0)
 
     local barFill = Instance.new("Frame", barBg)
     barFill.BackgroundColor3 = C.accent
     barFill.BorderSizePixel = 0
-    barFill.Size = UDim2.new(0, 0, 1, 0)
-    Instance.new("UICorner", barFill).CornerRadius = UDim.new(1, 0)
-
+    barFill.Size = UDim2.new(0,0,1,0)
+    Instance.new("UICorner", barFill).CornerRadius = UDim.new(1,0)
     local barGrad = Instance.new("UIGradient", barFill)
     barGrad.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 100, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(120, 40, 200))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(200,100,255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(120,40,200))
     }
 
+    -- Animation
     task.spawn(function()
         local t0 = tick()
         local totalTime = 2.4
         while holder and holder.Parent do
             local t = tick() - t0
             local pct = math.min(t / totalTime, 1)
-
             pcall(function()
                 ring1.Rotation = (t * 90) % 360
                 ring2.Rotation = -(t * 60) % 360
                 ring3.Rotation = (t * 130) % 360
-                centerLogo.Rotation = math.sin(t * 1.4) * 8
-
-                local glowPulse = 0.5 + (math.sin(t * 3) + 1) * 0.18
+                centerLogo.Rotation = math.sin(t*1.4)*8
+                local glowPulse = 0.5 + (math.sin(t*3)+1)*0.18
                 glow.ImageTransparency = glowPulse
-
+                -- Particules orbitales
                 for i, dot in ipairs(dots) do
-                    local angle = (t * (0.9 + i * 0.18)) + (i * (math.pi * 2 / 6))
-                    local radius = 54 + math.sin(t * 2 + i) * 10
-                    dot.Position = UDim2.new(0.5, math.cos(angle) * radius, 0.5, math.sin(angle) * radius)
-                    dot.BackgroundTransparency = 0.2 + math.abs(math.sin(t + i * 0.5)) * 0.5
+                    local angle = (t * (0.9 + i*0.18)) + (i * (math.pi*2/6))
+                    local radius = 54 + math.sin(t*2 + i)*10
+                    dot.Position = UDim2.new(0.5, math.cos(angle)*radius, 0.5, math.sin(angle)*radius)
+                    dot.BackgroundTransparency = 0.2 + math.abs(math.sin(t + i*0.5))*0.5
                 end
-
                 barFill.Size = UDim2.new(pct, 0, 1, 0)
             end)
-
             RunService.RenderStepped:Wait()
         end
     end)
 
     return holder
 end
+
 function lib:init(ti, dosplash, visiblekey, deleteprevious)
     local scrgui
-
     local function getParent()
-        if syn then
-            return game:GetService("CoreGui")
-        end
-        if gethui then
-            return gethui()
-        end
+        if syn then return game:GetService("CoreGui") end
+        if gethui then return gethui() end
         return game:GetService("CoreGui")
     end
-
     local parentGui = getParent()
     local old = parentGui:FindFirstChild("ScreenGui")
     if old and deleteprevious then
-        pcall(function()
-            tp(old:FindFirstChild("main"), old.main.Position + UDim2.new(0, 0, 2, 0), 0.5)
-        end)
+        pcall(function() tp(old:FindFirstChild("main"), old.main.Position + UDim2.new(0,0,2,0), 0.5) end)
         Debris:AddItem(old, 1)
     end
-
     scrgui = Instance.new("ScreenGui")
-    scrgui.Name = "ScreenGui"
-    scrgui.ResetOnSpawn = false
-    pcall(function()
-        if syn then
-            syn.protect_gui(scrgui)
-        end
-    end)
+    scrgui.Name = "ScreenGui"; scrgui.ResetOnSpawn = false
+    pcall(function() if syn then syn.protect_gui(scrgui) end end)
     scrgui.Parent = parentGui
 
+    -- SPLASH
     if dosplash then
         local splash = Instance.new("Frame", scrgui)
-        splash.Name = "splash"
-        splash.AnchorPoint = Vector2.new(0.5, 0.5)
-        splash.BackgroundColor3 = C.bg
-        splash.BackgroundTransparency = 0.04
-        splash.Position = UDim2.new(0.5, 0, 2, 0)
-        splash.Size = UDim2.new(0, 360, 0, 360)
-        splash.ZIndex = 40
-        Instance.new("UICorner", splash).CornerRadius = UDim.new(0, 22)
+        splash.Name = "splash"; splash.AnchorPoint = Vector2.new(0.5,0.5)
+        splash.BackgroundColor3 = C.bg; splash.BackgroundTransparency = 0.04
+        splash.Position = UDim2.new(0.5,0,2,0); splash.Size = UDim2.new(0,360,0,360); splash.ZIndex = 40
+        Instance.new("UICorner", splash).CornerRadius = UDim.new(0,22)
 
+        -- Bordure animée
         local splashStroke = Instance.new("UIStroke", splash)
-        splashStroke.Color = C.accent
-        splashStroke.Thickness = 2
+        splashStroke.Color = C.accent; splashStroke.Thickness = 2
 
+        -- Glow externe splash
         local splashGlow = Instance.new("ImageLabel", splash)
-        splashGlow.AnchorPoint = Vector2.new(0.5, 0.5)
-        splashGlow.BackgroundTransparency = 1
-        splashGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
-        splashGlow.Size = UDim2.new(1.5, 0, 1.5, 0)
-        splashGlow.ZIndex = 39
-        splashGlow.Image = "rbxassetid://313486536"
-        splashGlow.ImageColor3 = C.accent
-        splashGlow.ImageTransparency = 0.5
+        splashGlow.AnchorPoint = Vector2.new(0.5,0.5); splashGlow.BackgroundTransparency = 1
+        splashGlow.Position = UDim2.new(0.5,0,0.5,0); splashGlow.Size = UDim2.new(1.5,0,1.5,0)
+        splashGlow.ZIndex = 39; splashGlow.Image = "rbxassetid://313486536"
+        splashGlow.ImageColor3 = C.accent; splashGlow.ImageTransparency = 0.5
 
+        -- LOADER custom
         local loader = createLoader(splash)
 
+        -- Titre
         local splashTitle = Instance.new("TextLabel", splash)
-        splashTitle.AnchorPoint = Vector2.new(0.5, 0.5)
-        splashTitle.BackgroundTransparency = 1
-        splashTitle.Position = UDim2.new(0.5, 0, 0.79, 0)
-        splashTitle.Size = UDim2.new(0.9, 0, 0, 36)
-        splashTitle.Font = Enum.Font.GothamBold
-        splashTitle.Text = "KIZOIN HUB"
-        splashTitle.TextColor3 = C.text
-        splashTitle.TextSize = 28
-        splashTitle.ZIndex = 42
+        splashTitle.AnchorPoint = Vector2.new(0.5,0.5); splashTitle.BackgroundTransparency = 1
+        splashTitle.Position = UDim2.new(0.5,0,0.79,0); splashTitle.Size = UDim2.new(0.9,0,0,36)
+        splashTitle.Font = Enum.Font.GothamBold; splashTitle.Text = "KIZOIN HUB"
+        splashTitle.TextColor3 = C.text; splashTitle.TextSize = 28; splashTitle.ZIndex = 42
         Instance.new("UIGradient", splashTitle).Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(240, 190, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(130, 50, 210))
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(240,190,255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(130,50,210))
         }
 
         local splashSub = Instance.new("TextLabel", splash)
-        splashSub.AnchorPoint = Vector2.new(0.5, 0.5)
-        splashSub.BackgroundTransparency = 1
-        splashSub.Position = UDim2.new(0.5, 0, 0.9, 0)
-        splashSub.Size = UDim2.new(0.9, 0, 0, 22)
-        splashSub.Font = Enum.Font.Gotham
-        splashSub.Text = "「 I am atomic. I am the Shadow. 」"
-        splashSub.TextColor3 = C.subtext
-        splashSub.TextSize = 14
-        splashSub.ZIndex = 42
+        splashSub.AnchorPoint = Vector2.new(0.5,0.5); splashSub.BackgroundTransparency = 1
+        splashSub.Position = UDim2.new(0.5,0,0.9,0); splashSub.Size = UDim2.new(0.9,0,0,22)
+        splashSub.Font = Enum.Font.Gotham; splashSub.Text = "「 I am atomic. I am the Shadow. 」"
+        splashSub.TextColor3 = C.subtext; splashSub.TextSize = 14; splashSub.ZIndex = 42
 
+        -- Animation entrée + sortie
         task.spawn(function()
             while splash.Parent do
                 tween(splashStroke, {Thickness = 3}, 0.7, Enum.EasingStyle.Sine)
@@ -363,1113 +288,644 @@ function lib:init(ti, dosplash, visiblekey, deleteprevious)
                 task.wait(0.7)
             end
         end)
-
-        splash:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), "InOut", "Quart", 0.9)
+        splash:TweenPosition(UDim2.new(0.5,0,0.5,0), "InOut", "Quart", 0.9)
         playSound(POPUP_SND, 0.45, 1)
         task.wait(3)
         tween(splash, {BackgroundTransparency = 1}, 0.5)
         tween(splashStroke, {Transparency = 1}, 0.4)
         tween(splashTitle, {TextTransparency = 1}, 0.4)
         tween(splashSub, {TextTransparency = 1}, 0.4)
-        splash:TweenPosition(UDim2.new(0.5, 0, 2, 0), "InOut", "Quart", 0.9)
+        splash:TweenPosition(UDim2.new(0.5,0,2,0), "InOut", "Quart", 0.9)
         Debris:AddItem(splash, 1)
     end
 
+    -- MAIN FRAME
     local main = Instance.new("Frame", scrgui)
-    main.Name = "main"
-    main.AnchorPoint = Vector2.new(0.5, 0.5)
-    main.BackgroundColor3 = C.bg
-    main.BackgroundTransparency = 0.05
-    main.Position = UDim2.new(0.5, 0, 1.8, 0)
-    main.Size = UDim2.new(0, 721, 0, 584)
-    Instance.new("UICorner", main).CornerRadius = UDim.new(0, 18)
+    main.Name = "main"; main.AnchorPoint = Vector2.new(0.5,0.5)
+    main.BackgroundColor3 = C.bg; main.BackgroundTransparency = 0.05
+    main.Position = UDim2.new(0.5,0,1.8,0); main.Size = UDim2.new(0,721,0,584)
+    Instance.new("UICorner", main).CornerRadius = UDim.new(0,18)
 
     local mainStroke = Instance.new("UIStroke", main)
-    mainStroke.Color = C.accentDark
-    mainStroke.Thickness = 1.5
+    mainStroke.Color = C.accentDark; mainStroke.Thickness = 1.5
 
     local mainGrad = Instance.new("UIGradient", main)
     mainGrad.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(18, 10, 30)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 5, 15))
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(18,10,30)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(8,5,15))
     }
     mainGrad.Rotation = 135
 
+    -- Glow externe
     local mainGlow = Instance.new("ImageLabel", main)
-    mainGlow.AnchorPoint = Vector2.new(0.5, 0.5)
-    mainGlow.BackgroundTransparency = 1
-    mainGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
-    mainGlow.Size = UDim2.new(1, 140, 1, 140)
-    mainGlow.ZIndex = -1
-    mainGlow.Image = "rbxassetid://8992230677"
-    mainGlow.ImageColor3 = C.accent
-    mainGlow.ImageTransparency = 0.42
-    mainGlow.ScaleType = Enum.ScaleType.Slice
-    mainGlow.SliceCenter = Rect.new(99, 99, 99, 99)
+    mainGlow.AnchorPoint = Vector2.new(0.5,0.5); mainGlow.BackgroundTransparency = 1
+    mainGlow.Position = UDim2.new(0.5,0,0.5,0); mainGlow.Size = UDim2.new(1,140,1,140)
+    mainGlow.ZIndex = -1; mainGlow.Image = "rbxassetid://8992230677"
+    mainGlow.ImageColor3 = C.accent; mainGlow.ImageTransparency = 0.42
+    mainGlow.ScaleType = Enum.ScaleType.Slice; mainGlow.SliceCenter = Rect.new(99,99,99,99)
 
+    -- Orbes ambiant
     local orb1 = Instance.new("ImageLabel", main)
-    orb1.Name = "Orb1"
-    orb1.AnchorPoint = Vector2.new(0.5, 0.5)
-    orb1.BackgroundTransparency = 1
-    orb1.Position = UDim2.new(0.88, 0, 0.18, 0)
-    orb1.Size = UDim2.new(0, 250, 0, 250)
-    orb1.Image = "rbxassetid://313486536"
-    orb1.ImageColor3 = Color3.fromRGB(160, 80, 230)
-    orb1.ImageTransparency = 0.82
-    orb1.ZIndex = 0
+    orb1.Name="Orb1"; orb1.AnchorPoint=Vector2.new(0.5,0.5); orb1.BackgroundTransparency=1
+    orb1.Position=UDim2.new(0.88,0,0.18,0); orb1.Size=UDim2.new(0,250,0,250)
+    orb1.Image="rbxassetid://313486536"; orb1.ImageColor3=Color3.fromRGB(160,80,230)
+    orb1.ImageTransparency=0.82; orb1.ZIndex=0
 
     local orb2 = Instance.new("ImageLabel", main)
-    orb2.Name = "Orb2"
-    orb2.AnchorPoint = Vector2.new(0.5, 0.5)
-    orb2.BackgroundTransparency = 1
-    orb2.Position = UDim2.new(0.74, 0, 0.92, 0)
-    orb2.Size = UDim2.new(0, 330, 0, 330)
-    orb2.Image = "rbxassetid://313486536"
-    orb2.ImageColor3 = Color3.fromRGB(100, 35, 180)
-    orb2.ImageTransparency = 0.88
-    orb2.ZIndex = 0
+    orb2.Name="Orb2"; orb2.AnchorPoint=Vector2.new(0.5,0.5); orb2.BackgroundTransparency=1
+    orb2.Position=UDim2.new(0.74,0,0.92,0); orb2.Size=UDim2.new(0,330,0,330)
+    orb2.Image="rbxassetid://313486536"; orb2.ImageColor3=Color3.fromRGB(100,35,180)
+    orb2.ImageTransparency=0.88; orb2.ZIndex=0
 
+    -- DRAG
     local UIS = game:GetService("UserInputService")
     local dragging, dragInput, dragStart, startPos
-
     main.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = main.Position
-
+            dragging=true; dragStart=input.Position; startPos=main.Position
             input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
+                if input.UserInputState == Enum.UserInputState.End then dragging=false end
             end)
         end
     end)
-
     main.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
+        if input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch then
+            dragInput=input
         end
     end)
-
     UIS.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
+        if input==dragInput and dragging then
             pcall(function()
                 local d = input.Position - dragStart
-                main.Position = UDim2.new(
-                    startPos.X.Scale,
-                    startPos.X.Offset + d.X,
-                    startPos.Y.Scale,
-                    startPos.Y.Offset + d.Y
-                )
+                main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset+d.X, startPos.Y.Scale, startPos.Y.Offset+d.Y)
             end)
         end
     end)
 
+    -- WORKAREA
     local workarea = Instance.new("Frame", main)
-    workarea.Name = "workarea"
-    workarea.BackgroundColor3 = Color3.fromRGB(18, 10, 28)
-    workarea.BackgroundTransparency = 0.18
-    workarea.Position = UDim2.new(0.36403501, 0, 0, 0)
-    workarea.Size = UDim2.new(0, 458, 0, 584)
-    workarea.ClipsDescendants = true
-    Instance.new("UICorner", workarea).CornerRadius = UDim.new(0, 18)
+    workarea.Name="workarea"; workarea.BackgroundColor3=Color3.fromRGB(18,10,28)
+    workarea.BackgroundTransparency=0.18; workarea.Position=UDim2.new(0.36403501,0,0,0)
+    workarea.Size=UDim2.new(0,458,0,584); workarea.ClipsDescendants=true
+    Instance.new("UICorner", workarea).CornerRadius=UDim.new(0,18)
+    local waCH=Instance.new("Frame",workarea); waCH.BackgroundColor3=Color3.fromRGB(18,10,28)
+    waCH.BackgroundTransparency=0.18; waCH.BorderSizePixel=0; waCH.Size=UDim2.new(0,18,1,0)
 
-    local waCH = Instance.new("Frame", workarea)
-    waCH.BackgroundColor3 = Color3.fromRGB(18, 10, 28)
-    waCH.BackgroundTransparency = 0.18
-    waCH.BorderSizePixel = 0
-    waCH.Size = UDim2.new(0, 18, 1, 0)
-
+    -- Logo K topbar workarea
     local waLogo = Instance.new("ImageLabel", workarea)
-    waLogo.AnchorPoint = Vector2.new(0.5, 0)
-    waLogo.Position = UDim2.new(0.5, 0, 0.012, 0)
-    waLogo.Size = UDim2.new(0, 50, 0, 50)
-    waLogo.ZIndex = 4
-    applyLogo(waLogo, RAW_LOGO_ID)
+    waLogo.AnchorPoint=Vector2.new(0.5,0); waLogo.BackgroundTransparency=1
+    waLogo.Position=UDim2.new(0.5,0,0.012,0); waLogo.Size=UDim2.new(0,50,0,50)
+    waLogo.ZIndex=4; waLogo.Image=LOGO_ID; waLogo.ScaleType=Enum.ScaleType.Fit
 
-    local emblem = Instance.new("ImageLabel", workarea)
-    emblem.AnchorPoint = Vector2.new(1, 0)
-    emblem.Position = UDim2.new(1, -12, 0, 12)
-    emblem.Size = UDim2.new(0, 72, 0, 72)
-    emblem.ZIndex = 1
-    applyLogo(emblem, RAW_LOGO_ID, C.accent, 0.7)
+    -- Emblem coin
+    local emblem=Instance.new("ImageLabel",workarea); emblem.AnchorPoint=Vector2.new(1,0)
+    emblem.BackgroundTransparency=1; emblem.Position=UDim2.new(1,-12,0,12)
+    emblem.Size=UDim2.new(0,72,0,72); emblem.Image=LOGO_ID
+    emblem.ImageColor3=C.accent; emblem.ImageTransparency=0.7; emblem.ZIndex=1
 
-    local heroArt = Instance.new("ImageLabel", workarea)
-    heroArt.AnchorPoint = Vector2.new(1, 1)
-    heroArt.Position = UDim2.new(1, -8, 1, -8)
-    heroArt.Size = UDim2.new(0, 190, 0, 270)
-    heroArt.ZIndex = 1
-    applyLogo(heroArt, RAW_LOGO_ID, nil, 0.8)
+    -- Hero art coin bas droit
+    local heroArt=Instance.new("ImageLabel",workarea); heroArt.AnchorPoint=Vector2.new(1,1)
+    heroArt.BackgroundTransparency=1; heroArt.Position=UDim2.new(1,-8,1,-8)
+    heroArt.Size=UDim2.new(0,190,0,270); heroArt.Image=LOGO_ID
+    heroArt.ImageTransparency=0.8; heroArt.ScaleType=Enum.ScaleType.Fit; heroArt.ZIndex=1
 
-    local separator = Instance.new("Frame", main)
-    separator.BackgroundColor3 = C.accentDark
-    separator.BorderSizePixel = 0
-    separator.Position = UDim2.new(0.358, 0, 0.05, 0)
-    separator.Size = UDim2.new(0, 1, 0.9, 0)
+    local separator=Instance.new("Frame",main); separator.BackgroundColor3=C.accentDark
+    separator.BorderSizePixel=0; separator.Position=UDim2.new(0.358,0,0.05,0)
+    separator.Size=UDim2.new(0,1,0.9,0)
 
-    local search = Instance.new("Frame", main)
-    search.Name = "search"
-    search.BackgroundColor3 = Color3.fromRGB(25, 15, 40)
-    search.Position = UDim2.new(0.0256, 0, 0.0958, 0)
-    search.Size = UDim2.new(0, 225, 0, 34)
-    Instance.new("UICorner", search).CornerRadius = UDim.new(0, 9)
+    -- SEARCHBAR
+    local search=Instance.new("Frame",main); search.Name="search"
+    search.BackgroundColor3=Color3.fromRGB(25,15,40)
+    search.Position=UDim2.new(0.0256,0,0.0958,0); search.Size=UDim2.new(0,225,0,34)
+    Instance.new("UICorner",search).CornerRadius=UDim.new(0,9)
+    local searchStroke=Instance.new("UIStroke",search); searchStroke.Color=C.accentDark; searchStroke.Thickness=1
 
-    local searchStroke = Instance.new("UIStroke", search)
-    searchStroke.Color = C.accentDark
-    searchStroke.Thickness = 1
+    local searchicon=Instance.new("ImageButton",search); searchicon.BackgroundTransparency=1
+    searchicon.Position=UDim2.new(0.038,-2,0.139,2); searchicon.Size=UDim2.new(0,24,0,21)
+    searchicon.Image="rbxassetid://2804603863"; searchicon.ImageColor3=C.subtext
+    searchicon.ScaleType=Enum.ScaleType.Fit
 
-    local searchicon = Instance.new("ImageButton", search)
-    searchicon.BackgroundTransparency = 1
-    searchicon.Position = UDim2.new(0.038, -2, 0.139, 2)
-    searchicon.Size = UDim2.new(0, 24, 0, 21)
-    searchicon.Image = "rbxassetid://2804603863"
-    searchicon.ImageColor3 = C.subtext
-    searchicon.ScaleType = Enum.ScaleType.Fit
+    local stb=Instance.new("TextBox",search); stb.Name="searchtextbox"
+    stb.BackgroundTransparency=1; stb.ClipsDescendants=true
+    stb.Position=UDim2.new(0.18,0,-0.016,0); stb.Size=UDim2.new(0,176,0,34)
+    stb.Font=Enum.Font.Gotham; stb.PlaceholderText="Search..."
+    stb.PlaceholderColor3=C.subtext; stb.Text=""; stb.TextColor3=C.text
+    stb.TextSize=18; stb.TextXAlignment=Enum.TextXAlignment.Left
+    searchicon.MouseButton1Click:Connect(function() stb:CaptureFocus() end)
+    stb.Focused:Connect(function() tween(searchStroke,{Color=C.accent},0.3) end)
+    stb.FocusLost:Connect(function() tween(searchStroke,{Color=C.accentDark},0.3) end)
 
-    local stb = Instance.new("TextBox", search)
-    stb.Name = "searchtextbox"
-    stb.BackgroundTransparency = 1
-    stb.ClipsDescendants = true
-    stb.Position = UDim2.new(0.18, 0, -0.016, 0)
-    stb.Size = UDim2.new(0, 176, 0, 34)
-    stb.Font = Enum.Font.Gotham
-    stb.PlaceholderText = "Search..."
-    stb.PlaceholderColor3 = C.subtext
-    stb.Text = ""
-    stb.TextColor3 = C.text
-    stb.TextSize = 18
-    stb.TextXAlignment = Enum.TextXAlignment.Left
+    -- SIDEBAR
+    local sidebar=Instance.new("ScrollingFrame",main); sidebar.Name="sidebar"
+    sidebar.Active=true; sidebar.BackgroundTransparency=1; sidebar.BorderSizePixel=0
+    sidebar.Position=UDim2.new(0.0249,0,0.1815,0); sidebar.Size=UDim2.new(0,233,0,463)
+    sidebar.AutomaticCanvasSize="Y"; sidebar.CanvasSize=UDim2.new(0,0,0,0)
+    sidebar.ScrollBarThickness=2; sidebar.ScrollBarImageColor3=C.accent
+    local sbl=Instance.new("UIListLayout",sidebar); sbl.SortOrder=Enum.SortOrder.LayoutOrder
+    sbl.Padding=UDim.new(0,5)
 
-    searchicon.MouseButton1Click:Connect(function()
-        stb:CaptureFocus()
-    end)
-
-    stb.Focused:Connect(function()
-        tween(searchStroke, {Color = C.accent}, 0.3)
-    end)
-
-    stb.FocusLost:Connect(function()
-        tween(searchStroke, {Color = C.accentDark}, 0.3)
-    end)
-
-    local sidebar = Instance.new("ScrollingFrame", main)
-    sidebar.Name = "sidebar"
-    sidebar.Active = true
-    sidebar.BackgroundTransparency = 1
-    sidebar.BorderSizePixel = 0
-    sidebar.Position = UDim2.new(0.0249, 0, 0.1815, 0)
-    sidebar.Size = UDim2.new(0, 233, 0, 463)
-    sidebar.AutomaticCanvasSize = "Y"
-    sidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
-    sidebar.ScrollBarThickness = 2
-    sidebar.ScrollBarImageColor3 = C.accent
-
-    local sbl = Instance.new("UIListLayout", sidebar)
-    sbl.SortOrder = Enum.SortOrder.LayoutOrder
-    sbl.Padding = UDim.new(0, 5)
-
-    local rTag = "kizoin_" .. tostring(math.random(1e5, 9e5))
-    RunService:BindToRenderStep(rTag, 1, function()
-        local txt = string.upper(stb.Text)
-        for _, btn in pairs(sidebar:GetChildren()) do
+    local rTag="kizoin_"..tostring(math.random(1e5,9e5))
+    RunService:BindToRenderStep(rTag,1,function()
+        local txt=string.upper(stb.Text)
+        for _,btn in pairs(sidebar:GetChildren()) do
             if btn:IsA("TextButton") then
-                btn.Visible = txt == "" or string.find(string.upper(btn.Text), txt) ~= nil
+                btn.Visible = txt=="" or string.find(string.upper(btn.Text),txt)~=nil
             end
         end
     end)
-
     scrgui.Destroying:Connect(function()
-        pcall(function()
-            RunService:UnbindFromRenderStep(rTag)
-        end)
-        pcall(function()
-            if blur and blur.Parent then
-                blur.Enabled = false
-                blur.Size = 0
-            end
-        end)
+        pcall(function() RunService:UnbindFromRenderStep(rTag) end)
+        pcall(function() if blur and blur.Parent then blur.Enabled=false; blur.Size=0 end end)
     end)
 
-    local btnFrame = Instance.new("Frame", main)
-    btnFrame.Name = "buttons"
-    btnFrame.BackgroundTransparency = 1
-    btnFrame.Size = UDim2.new(0, 105, 0, 57)
-
-    local bll = Instance.new("UIListLayout", btnFrame)
-    bll.FillDirection = Enum.FillDirection.Horizontal
-    bll.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    bll.SortOrder = Enum.SortOrder.LayoutOrder
-    bll.VerticalAlignment = Enum.VerticalAlignment.Center
-    bll.Padding = UDim.new(0, 10)
+    -- MACOS BUTTONS
+    local btnFrame=Instance.new("Frame",main); btnFrame.Name="buttons"
+    btnFrame.BackgroundTransparency=1; btnFrame.Size=UDim2.new(0,105,0,57)
+    local bll=Instance.new("UIListLayout",btnFrame)
+    bll.FillDirection=Enum.FillDirection.Horizontal
+    bll.HorizontalAlignment=Enum.HorizontalAlignment.Center
+    bll.SortOrder=Enum.SortOrder.LayoutOrder
+    bll.VerticalAlignment=Enum.VerticalAlignment.Center
+    bll.Padding=UDim.new(0,10)
 
     local function makeBtn(col)
-        local b = Instance.new("TextButton", btnFrame)
-        b.BackgroundColor3 = col
-        b.Size = UDim2.new(0, 16, 0, 16)
-        b.AutoButtonColor = false
-        b.Font = Enum.Font.SourceSans
-        b.Text = ""
-        Instance.new("UICorner", b).CornerRadius = UDim.new(1, 0)
-
-        b.MouseEnter:Connect(function()
-            tween(b, {Size = UDim2.new(0, 20, 0, 20)}, 0.15)
-        end)
-
-        b.MouseLeave:Connect(function()
-            tween(b, {Size = UDim2.new(0, 16, 0, 16)}, 0.15)
-        end)
-
+        local b=Instance.new("TextButton",btnFrame)
+        b.BackgroundColor3=col; b.Size=UDim2.new(0,16,0,16)
+        b.AutoButtonColor=false; b.Font=Enum.Font.SourceSans; b.Text=""
+        Instance.new("UICorner",b).CornerRadius=UDim.new(1,0)
+        b.MouseEnter:Connect(function() tween(b,{Size=UDim2.new(0,20,0,20)},0.15) end)
+        b.MouseLeave:Connect(function() tween(b,{Size=UDim2.new(0,16,0,16)},0.15) end)
         return b
     end
-
-    local closeBtn = makeBtn(Color3.fromRGB(254, 94, 86))
-    local minimizeBtn = makeBtn(Color3.fromRGB(255, 189, 46))
-    local resizeBtn = makeBtn(C.accent)
+    local closeBtn=makeBtn(Color3.fromRGB(254,94,86))
+    local minimizeBtn=makeBtn(Color3.fromRGB(255,189,46))
+    local resizeBtn=makeBtn(C.accent)
 
     closeBtn.MouseButton1Click:Connect(function()
-        playSound(POPUP_SND, 0.35, 0.85)
-        tween(main, {Position = main.Position + UDim2.new(0, 0, 2, 0)}, 0.5)
-        task.wait(0.5)
-        pcall(function()
-            scrgui:Destroy()
-        end)
+        playSound(POPUP_SND,0.35,0.85)
+        tween(main,{Position=main.Position+UDim2.new(0,0,2,0)},0.5)
+        task.wait(0.5); pcall(function() scrgui:Destroy() end)
     end)
 
-    local title = Instance.new("TextLabel", main)
-    title.Name = "title"
-    title.BackgroundTransparency = 1
-    title.Position = UDim2.new(0.389, 0, 0.035, 0)
-    title.Size = UDim2.new(0, 400, 0, 15)
-    title.Font = Enum.Font.GothamBold
-    title.TextColor3 = C.text
-    title.TextSize = 28
-    title.TextWrapped = true
-    title.TextXAlignment = Enum.TextXAlignment.Left
-    title.Text = ti or ""
-
-    Instance.new("UIGradient", title).Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(240, 190, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(140, 60, 220))
+    -- TITLE
+    local title=Instance.new("TextLabel",main); title.Name="title"
+    title.BackgroundTransparency=1; title.Position=UDim2.new(0.389,0,0.035,0)
+    title.Size=UDim2.new(0,400,0,15); title.Font=Enum.Font.GothamBold
+    title.TextColor3=C.text; title.TextSize=28; title.TextWrapped=true
+    title.TextXAlignment=Enum.TextXAlignment.Left; title.Text=ti or ""
+    Instance.new("UIGradient",title).Color=ColorSequence.new{
+        ColorSequenceKeypoint.new(0,Color3.fromRGB(240,190,255)),
+        ColorSequenceKeypoint.new(1,Color3.fromRGB(140,60,220))
     }
 
+    -- Animation ambiante
     task.spawn(function()
-        local t0 = tick()
+        local t0=tick()
         while main and main.Parent do
-            local t = tick() - t0
+            local t=tick()-t0
             pcall(function()
-                orb1.Rotation = (t * 6) % 360
-                orb2.Rotation = -(t * 4) % 360
-                orb1.Position = UDim2.new(0.88, math.cos(t * 0.8) * 10, 0.18, math.sin(t * 1.0) * 8)
-                orb2.Position = UDim2.new(0.74, math.sin(t * 0.55) * 14, 0.92, math.cos(t * 0.7) * 10)
-                emblem.Rotation = math.sin(t * 0.9) * 6
-                waLogo.Rotation = math.sin(t * 0.6) * 4
-                mainStroke.Color = C.accentDark:Lerp(C.accent, (math.sin(t * 1.1) + 1) / 2)
+                orb1.Rotation=(t*6)%360; orb2.Rotation=-(t*4)%360
+                orb1.Position=UDim2.new(0.88,math.cos(t*0.8)*10,0.18,math.sin(t*1.0)*8)
+                orb2.Position=UDim2.new(0.74,math.sin(t*0.55)*14,0.92,math.cos(t*0.7)*10)
+                emblem.Rotation=math.sin(t*0.9)*6
+                waLogo.Rotation=math.sin(t*0.6)*4
+                mainStroke.Color=C.accentDark:Lerp(C.accent,(math.sin(t*1.1)+1)/2)
             end)
             RunService.RenderStepped:Wait()
         end
     end)
+    pulseStroke(mainStroke,1.5,2.2,1.1)
 
-    pulseStroke(mainStroke, 1.5, 2.2, 1.1)
-
+    -- MODAL
     local function revealModal(frame)
-        frame.Visible = true
-        frame.Position = UDim2.new(0.5, 0, 0.58, 0)
-        frame.Size = UDim2.new(0, 285, 0, 344)
-        setBlur(18, 0.18)
-        spring(frame, {
-            Position = UDim2.new(0.5, 0, 0.5, 0),
-            Size = UDim2.new(0, 304, 0, 362)
-        }, 0.22)
-        playSound(POPUP_SND, 0.5, 1.05)
+        frame.Visible=true
+        frame.Position=UDim2.new(0.5,0,0.58,0); frame.Size=UDim2.new(0,285,0,344)
+        setBlur(18,0.18)
+        spring(frame,{Position=UDim2.new(0.5,0,0.5,0),Size=UDim2.new(0,304,0,362)},0.22)
+        playSound(POPUP_SND,0.5,1.05)
     end
-
     local function hideModal(frame)
-        setBlur(0, 0.16)
-        tween(frame, {
-            Position = UDim2.new(0.5, 0, 0.58, 0),
-            Size = UDim2.new(0, 285, 0, 344)
-        }, 0.16)
-        task.delay(0.18, function()
-            pcall(function()
-                if frame and frame.Parent then
-                    frame.Visible = false
-                end
-            end)
+        setBlur(0,0.16)
+        tween(frame,{Position=UDim2.new(0.5,0,0.58,0),Size=UDim2.new(0,285,0,344)},0.16)
+        task.delay(0.18,function()
+            pcall(function() if frame and frame.Parent then frame.Visible=false end end)
         end)
     end
-    
-        -- NOTIF 1
-    local notif = Instance.new("Frame", main)
-    notif.Name = "notif"
-    notif.AnchorPoint = Vector2.new(0.5, 0.5)
-    notif.BackgroundColor3 = Color3.fromRGB(15, 8, 25)
-    notif.Position = UDim2.new(0.5, 0, 0.5, 0)
-    notif.Size = UDim2.new(0, 304, 0, 362)
-    notif.Visible = false
-    notif.ZIndex = 3
-    Instance.new("UICorner", notif).CornerRadius = UDim.new(0, 18)
 
-    local notifStroke = Instance.new("UIStroke", notif)
-    notifStroke.Color = C.accent
-    notifStroke.Thickness = 1.5
-    notifStroke.ZIndex = 3
+    -- NOTIF 1
+    local notif=Instance.new("Frame",main); notif.Name="notif"
+    notif.AnchorPoint=Vector2.new(0.5,0.5); notif.BackgroundColor3=Color3.fromRGB(15,8,25)
+    notif.Position=UDim2.new(0.5,0,0.5,0); notif.Size=UDim2.new(0,304,0,362)
+    notif.Visible=false; notif.ZIndex=3
+    Instance.new("UICorner",notif).CornerRadius=UDim.new(0,18)
+    local notifStroke=Instance.new("UIStroke",notif); notifStroke.Color=C.accent
+    notifStroke.Thickness=1.5; notifStroke.ZIndex=3
 
-    local notificon = Instance.new("ImageLabel", notif)
-    notificon.Name = "notificon"
-    notificon.Position = UDim2.new(0.3355, 0, 0.0994, 0)
-    notificon.Size = UDim2.new(0, 100, 0, 100)
-    notificon.ZIndex = 3
-    applyLogo(notificon, RAW_LOGO_ID, C.accent)
+    local notificon=Instance.new("ImageLabel",notif); notificon.Name="notificon"
+    notificon.BackgroundTransparency=1; notificon.Position=UDim2.new(0.3355,0,0.0994,0)
+    notificon.Size=UDim2.new(0,100,0,100); notificon.ZIndex=3
+    notificon.Image=LOGO_ID; notificon.ImageColor3=C.accent; notificon.ScaleType=Enum.ScaleType.Fit
 
-    local notifGlow = Instance.new("ImageLabel", notif)
-    notifGlow.AnchorPoint = Vector2.new(0.5, 0.5)
-    notifGlow.BackgroundTransparency = 1
-    notifGlow.Position = UDim2.new(0.5, 0, 0.22, 0)
-    notifGlow.Size = UDim2.new(0, 180, 0, 180)
-    notifGlow.Image = "rbxassetid://313486536"
-    notifGlow.ImageColor3 = C.accent
-    notifGlow.ImageTransparency = 0.7
-    notifGlow.ZIndex = 2
+    local notifGlow=Instance.new("ImageLabel",notif); notifGlow.AnchorPoint=Vector2.new(0.5,0.5)
+    notifGlow.BackgroundTransparency=1; notifGlow.Position=UDim2.new(0.5,0,0.22,0)
+    notifGlow.Size=UDim2.new(0,180,0,180); notifGlow.Image="rbxassetid://313486536"
+    notifGlow.ImageColor3=C.accent; notifGlow.ImageTransparency=0.7; notifGlow.ZIndex=2
 
-    local notiftitle = Instance.new("TextLabel", notif)
-    notiftitle.Name = "notiftitle"
-    notiftitle.BackgroundTransparency = 1
-    notiftitle.Position = UDim2.new(0.1677, 0, 0.3756, 0)
-    notiftitle.Size = UDim2.new(0, 200, 0, 50)
-    notiftitle.ZIndex = 3
-    notiftitle.Font = Enum.Font.GothamBold
-    notiftitle.TextColor3 = C.text
-    notiftitle.TextSize = 26
+    local notiftitle=Instance.new("TextLabel",notif); notiftitle.Name="notiftitle"
+    notiftitle.BackgroundTransparency=1; notiftitle.Position=UDim2.new(0.1677,0,0.3756,0)
+    notiftitle.Size=UDim2.new(0,200,0,50); notiftitle.ZIndex=3
+    notiftitle.Font=Enum.Font.GothamBold; notiftitle.TextColor3=C.text; notiftitle.TextSize=26
 
-    local notiftext = Instance.new("TextLabel", notif)
-    notiftext.Name = "notiftext"
-    notiftext.BackgroundTransparency = 1
-    notiftext.Position = UDim2.new(0.0822, 0, 0.5138, 0)
-    notiftext.Size = UDim2.new(0, 254, 0, 70)
-    notiftext.ZIndex = 3
-    notiftext.Font = Enum.Font.Gotham
-    notiftext.TextColor3 = C.subtext
-    notiftext.TextSize = 16
-    notiftext.TextWrapped = true
+    local notiftext=Instance.new("TextLabel",notif); notiftext.Name="notiftext"
+    notiftext.BackgroundTransparency=1; notiftext.Position=UDim2.new(0.0822,0,0.5138,0)
+    notiftext.Size=UDim2.new(0,254,0,70); notiftext.ZIndex=3
+    notiftext.Font=Enum.Font.Gotham; notiftext.TextColor3=C.subtext
+    notiftext.TextSize=16; notiftext.TextWrapped=true
 
-    local notifbtn1 = Instance.new("TextButton", notif)
-    notifbtn1.Name = "notifbutton1"
-    notifbtn1.BackgroundColor3 = C.accent
-    notifbtn1.Position = UDim2.new(0.0559, 0, 0.8176, 0)
-    notifbtn1.Size = UDim2.new(0, 270, 0, 50)
-    notifbtn1.ZIndex = 3
-    notifbtn1.Font = Enum.Font.GothamBold
-    notifbtn1.TextColor3 = C.white
-    notifbtn1.TextSize = 20
-    Instance.new("UICorner", notifbtn1).CornerRadius = UDim.new(0, 9)
-
-    Instance.new("UIGradient", notifbtn1).Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 80, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(120, 30, 200))
+    local notifbtn1=Instance.new("TextButton",notif); notifbtn1.Name="notifbutton1"
+    notifbtn1.BackgroundColor3=C.accent; notifbtn1.Position=UDim2.new(0.0559,0,0.8176,0)
+    notifbtn1.Size=UDim2.new(0,270,0,50); notifbtn1.ZIndex=3
+    notifbtn1.Font=Enum.Font.GothamBold; notifbtn1.TextColor3=C.white; notifbtn1.TextSize=20
+    Instance.new("UICorner",notifbtn1).CornerRadius=UDim.new(0,9)
+    Instance.new("UIGradient",notifbtn1).Color=ColorSequence.new{
+        ColorSequenceKeypoint.new(0,Color3.fromRGB(200,80,255)),
+        ColorSequenceKeypoint.new(1,Color3.fromRGB(120,30,200))
     }
-
     attachShine(notifbtn1)
-    notifbtn1.MouseEnter:Connect(function()
-        tween(notifbtn1, {BackgroundColor3 = C.accentDark}, 0.18)
-    end)
-    notifbtn1.MouseLeave:Connect(function()
-        tween(notifbtn1, {BackgroundColor3 = C.accent}, 0.18)
-    end)
+    notifbtn1.MouseEnter:Connect(function() tween(notifbtn1,{BackgroundColor3=C.accentDark},0.18) end)
+    notifbtn1.MouseLeave:Connect(function() tween(notifbtn1,{BackgroundColor3=C.accent},0.18) end)
 
-    local notifdark = Instance.new("Frame", notif)
-    notifdark.AnchorPoint = Vector2.new(0.5, 0.5)
-    notifdark.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    notifdark.BackgroundTransparency = 0.4
-    notifdark.Position = UDim2.new(0.5, 0, 0.5, 0)
-    notifdark.Size = UDim2.new(0, 721, 0, 584)
-    notifdark.ZIndex = 2
-    Instance.new("UICorner", notifdark).CornerRadius = UDim.new(0, 18)
+    local notifdark=Instance.new("Frame",notif); notifdark.AnchorPoint=Vector2.new(0.5,0.5)
+    notifdark.BackgroundColor3=Color3.fromRGB(0,0,0); notifdark.BackgroundTransparency=0.4
+    notifdark.Position=UDim2.new(0.5,0,0.5,0); notifdark.Size=UDim2.new(0,721,0,584); notifdark.ZIndex=2
+    Instance.new("UICorner",notifdark).CornerRadius=UDim.new(0,18)
 
     -- NOTIF 2
-    local notif2 = Instance.new("Frame", main)
-    notif2.Name = "notif2"
-    notif2.AnchorPoint = Vector2.new(0.5, 0.5)
-    notif2.BackgroundColor3 = Color3.fromRGB(15, 8, 25)
-    notif2.Position = UDim2.new(0.5, 0, 0.5, 0)
-    notif2.Size = UDim2.new(0, 304, 0, 362)
-    notif2.Visible = false
-    notif2.ZIndex = 3
-    Instance.new("UICorner", notif2).CornerRadius = UDim.new(0, 18)
+    local notif2=Instance.new("Frame",main); notif2.Name="notif2"
+    notif2.AnchorPoint=Vector2.new(0.5,0.5); notif2.BackgroundColor3=Color3.fromRGB(15,8,25)
+    notif2.Position=UDim2.new(0.5,0,0.5,0); notif2.Size=UDim2.new(0,304,0,362)
+    notif2.Visible=false; notif2.ZIndex=3
+    Instance.new("UICorner",notif2).CornerRadius=UDim.new(0,18)
+    local notif2Stroke=Instance.new("UIStroke",notif2); notif2Stroke.Color=C.accent
+    notif2Stroke.Thickness=1.5; notif2Stroke.ZIndex=3
 
-    local notif2Stroke = Instance.new("UIStroke", notif2)
-    notif2Stroke.Color = C.accent
-    notif2Stroke.Thickness = 1.5
-    notif2Stroke.ZIndex = 3
+    local notif2icon=Instance.new("ImageLabel",notif2); notif2icon.Name="notif2icon"
+    notif2icon.BackgroundTransparency=1; notif2icon.Position=UDim2.new(0.3355,0,0.0994,0)
+    notif2icon.Size=UDim2.new(0,100,0,100); notif2icon.ZIndex=3
+    notif2icon.Image=LOGO_ID; notif2icon.ImageColor3=C.accent; notif2icon.ScaleType=Enum.ScaleType.Fit
 
-    local notif2icon = Instance.new("ImageLabel", notif2)
-    notif2icon.Name = "notif2icon"
-    notif2icon.Position = UDim2.new(0.3355, 0, 0.0994, 0)
-    notif2icon.Size = UDim2.new(0, 100, 0, 100)
-    notif2icon.ZIndex = 3
-    applyLogo(notif2icon, RAW_LOGO_ID, C.accent)
+    local notif2Glow=Instance.new("ImageLabel",notif2); notif2Glow.AnchorPoint=Vector2.new(0.5,0.5)
+    notif2Glow.BackgroundTransparency=1; notif2Glow.Position=UDim2.new(0.5,0,0.22,0)
+    notif2Glow.Size=UDim2.new(0,180,0,180); notif2Glow.Image="rbxassetid://313486536"
+    notif2Glow.ImageColor3=C.accent; notif2Glow.ImageTransparency=0.7; notif2Glow.ZIndex=2
 
-    local notif2Glow = Instance.new("ImageLabel", notif2)
-    notif2Glow.AnchorPoint = Vector2.new(0.5, 0.5)
-    notif2Glow.BackgroundTransparency = 1
-    notif2Glow.Position = UDim2.new(0.5, 0, 0.22, 0)
-    notif2Glow.Size = UDim2.new(0, 180, 0, 180)
-    notif2Glow.Image = "rbxassetid://313486536"
-    notif2Glow.ImageColor3 = C.accent
-    notif2Glow.ImageTransparency = 0.7
-    notif2Glow.ZIndex = 2
+    local notif2title=Instance.new("TextLabel",notif2); notif2title.Name="notif2title"
+    notif2title.BackgroundTransparency=1; notif2title.Position=UDim2.new(0.1677,0,0.3756,0)
+    notif2title.Size=UDim2.new(0,200,0,50); notif2title.ZIndex=3
+    notif2title.Font=Enum.Font.GothamBold; notif2title.TextColor3=C.text; notif2title.TextSize=26
 
-    local notif2title = Instance.new("TextLabel", notif2)
-    notif2title.Name = "notif2title"
-    notif2title.BackgroundTransparency = 1
-    notif2title.Position = UDim2.new(0.1677, 0, 0.3756, 0)
-    notif2title.Size = UDim2.new(0, 200, 0, 50)
-    notif2title.ZIndex = 3
-    notif2title.Font = Enum.Font.GothamBold
-    notif2title.TextColor3 = C.text
-    notif2title.TextSize = 26
+    local notif2text=Instance.new("TextLabel",notif2); notif2text.Name="notif2text"
+    notif2text.BackgroundTransparency=1; notif2text.Position=UDim2.new(0.0822,0,0.5138,0)
+    notif2text.Size=UDim2.new(0,254,0,70); notif2text.ZIndex=3
+    notif2text.Font=Enum.Font.Gotham; notif2text.TextColor3=C.subtext
+    notif2text.TextSize=16; notif2text.TextWrapped=true
 
-    local notif2text = Instance.new("TextLabel", notif2)
-    notif2text.Name = "notif2text"
-    notif2text.BackgroundTransparency = 1
-    notif2text.Position = UDim2.new(0.0822, 0, 0.5138, 0)
-    notif2text.Size = UDim2.new(0, 254, 0, 70)
-    notif2text.ZIndex = 3
-    notif2text.Font = Enum.Font.Gotham
-    notif2text.TextColor3 = C.subtext
-    notif2text.TextSize = 16
-    notif2text.TextWrapped = true
-
-    local notif2btn1 = Instance.new("TextButton", notif2)
-    notif2btn1.Name = "notif2button1"
-    notif2btn1.BackgroundColor3 = C.accent
-    notif2btn1.Position = UDim2.new(0.0559, 0, 0.7154, 0)
-    notif2btn1.Size = UDim2.new(0, 270, 0, 40)
-    notif2btn1.ZIndex = 3
-    notif2btn1.Font = Enum.Font.GothamBold
-    notif2btn1.TextColor3 = C.white
-    notif2btn1.TextSize = 20
-    Instance.new("UICorner", notif2btn1).CornerRadius = UDim.new(0, 9)
-
-    Instance.new("UIGradient", notif2btn1).Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 80, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(120, 30, 200))
+    local notif2btn1=Instance.new("TextButton",notif2); notif2btn1.Name="notif2button1"
+    notif2btn1.BackgroundColor3=C.accent; notif2btn1.Position=UDim2.new(0.0559,0,0.7154,0)
+    notif2btn1.Size=UDim2.new(0,270,0,40); notif2btn1.ZIndex=3
+    notif2btn1.Font=Enum.Font.GothamBold; notif2btn1.TextColor3=C.white; notif2btn1.TextSize=20
+    Instance.new("UICorner",notif2btn1).CornerRadius=UDim.new(0,9)
+    Instance.new("UIGradient",notif2btn1).Color=ColorSequence.new{
+        ColorSequenceKeypoint.new(0,Color3.fromRGB(200,80,255)),
+        ColorSequenceKeypoint.new(1,Color3.fromRGB(120,30,200))
     }
-
     attachShine(notif2btn1)
-    notif2btn1.MouseEnter:Connect(function()
-        tween(notif2btn1, {BackgroundColor3 = C.accentDark}, 0.18)
-    end)
-    notif2btn1.MouseLeave:Connect(function()
-        tween(notif2btn1, {BackgroundColor3 = C.accent}, 0.18)
-    end)
+    notif2btn1.MouseEnter:Connect(function() tween(notif2btn1,{BackgroundColor3=C.accentDark},0.18) end)
+    notif2btn1.MouseLeave:Connect(function() tween(notif2btn1,{BackgroundColor3=C.accent},0.18) end)
 
-    local notif2btn2 = Instance.new("TextButton", notif2)
-    notif2btn2.Name = "notif2button2"
-    notif2btn2.BackgroundTransparency = 1
-    notif2btn2.BackgroundColor3 = C.accent
-    notif2btn2.Position = UDim2.new(0.0526, 0, 0.8425, 0)
-    notif2btn2.Size = UDim2.new(0, 270, 0, 40)
-    notif2btn2.ZIndex = 3
-    notif2btn2.Font = Enum.Font.Gotham
-    notif2btn2.TextColor3 = C.subtext
-    notif2btn2.TextSize = 20
-    Instance.new("UICorner", notif2btn2).CornerRadius = UDim.new(0, 9)
+    local notif2btn2=Instance.new("TextButton",notif2); notif2btn2.Name="notif2button2"
+    notif2btn2.BackgroundTransparency=1; notif2btn2.BackgroundColor3=C.accent
+    notif2btn2.Position=UDim2.new(0.0526,0,0.8425,0); notif2btn2.Size=UDim2.new(0,270,0,40)
+    notif2btn2.ZIndex=3; notif2btn2.Font=Enum.Font.Gotham
+    notif2btn2.TextColor3=C.subtext; notif2btn2.TextSize=20
+    Instance.new("UICorner",notif2btn2).CornerRadius=UDim.new(0,9)
 
-    local notif2dark = Instance.new("Frame", notif2)
-    notif2dark.AnchorPoint = Vector2.new(0.5, 0.5)
-    notif2dark.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    notif2dark.BackgroundTransparency = 0.4
-    notif2dark.Position = UDim2.new(0.5, 0, 0.5, 0)
-    notif2dark.Size = UDim2.new(0, 721, 0, 584)
-    notif2dark.ZIndex = 2
-    Instance.new("UICorner", notif2dark).CornerRadius = UDim.new(0, 18)
+    local notif2dark=Instance.new("Frame",notif2); notif2dark.AnchorPoint=Vector2.new(0.5,0.5)
+    notif2dark.BackgroundColor3=Color3.fromRGB(0,0,0); notif2dark.BackgroundTransparency=0.4
+    notif2dark.Position=UDim2.new(0.5,0,0.5,0); notif2dark.Size=UDim2.new(0,721,0,584); notif2dark.ZIndex=2
+    Instance.new("UICorner",notif2dark).CornerRadius=UDim.new(0,18)
 
+    -- Pulse notifs
     pulseStroke(notifStroke, 1.2, 2, 0.9)
     pulseStroke(notif2Stroke, 1.2, 2, 0.9)
 
-    spring(main, {Position = UDim2.new(0.5, 0, 0.5, 0)}, 0.9)
+    -- Entrée
+    spring(main,{Position=UDim2.new(0.5,0,0.5,0)},0.9)
 
-    local window = {}
-    local con1, con2
-    local currentWorkarea = nil
+    local window={}; local con1,con2; local currentWorkarea=nil
 
     function window:ToggleVisible()
-        if dbcooper then
-            return
-        end
-
-        visible = not visible
-        dbcooper = true
-
+        if dbcooper then return end
+        visible=not visible; dbcooper=true
         if visible then
-            playSound(POPUP_SND, 0.3, 1.1)
-            tp(main, UDim2.new(0.5, 0, 0.5, 0), 0.5)
+            playSound(POPUP_SND,0.3,1.1)
+            tp(main,UDim2.new(0.5,0,0.5,0),0.5)
         else
-            tp(main, main.Position + UDim2.new(0, 0, 2, 0), 0.5)
+            tp(main,main.Position+UDim2.new(0,0,2,0),0.5)
         end
-
-        task.wait(0.5)
-        dbcooper = false
+        task.wait(0.5); dbcooper=false
     end
 
     if visiblekey then
-        minimizeBtn.MouseButton1Click:Connect(function()
-            window:ToggleVisible()
-        end)
-
-        UIS.InputBegan:Connect(function(input, gpe)
-            if not gpe and input.KeyCode == visiblekey then
-                window:ToggleVisible()
-            end
+        minimizeBtn.MouseButton1Click:Connect(function() window:ToggleVisible() end)
+        UIS.InputBegan:Connect(function(input,gpe)
+            if not gpe and input.KeyCode==visiblekey then window:ToggleVisible() end
         end)
     end
 
     function window:GreenButton(callback)
-        if _G.kizoin_gbtn then
-            pcall(function()
-                _G.kizoin_gbtn:Disconnect()
-            end)
-        end
-
-        _G.kizoin_gbtn = resizeBtn.MouseButton1Click:Connect(function()
-            tween(resizeBtn, {BackgroundColor3 = C.accentDark}, 0.1)
-            task.wait(0.1)
-            tween(resizeBtn, {BackgroundColor3 = C.accent}, 0.1)
-            playSound(POPUP_SND, 0.35, 1)
-            pcall(callback)
+        if _G.kizoin_gbtn then pcall(function() _G.kizoin_gbtn:Disconnect() end) end
+        _G.kizoin_gbtn=resizeBtn.MouseButton1Click:Connect(function()
+            tween(resizeBtn,{BackgroundColor3=C.accentDark},0.1)
+            task.wait(0.1); tween(resizeBtn,{BackgroundColor3=C.accent},0.1)
+            playSound(POPUP_SND,0.35,1); pcall(callback)
         end)
     end
 
     function window:TempNotify(text1, text2, icon)
-        for _, v in next, scrgui:GetChildren() do
-            if v.Name == "tempnotif" then
-                pcall(function()
-                    tp(v, v.Position + UDim2.new(0, 0, 0, 130), 0.22)
-                end)
+        for _,v in next,scrgui:GetChildren() do
+            if v.Name=="tempnotif" then
+                pcall(function() tp(v, v.Position+UDim2.new(0,0,0,130), 0.22) end)
             end
         end
+        local tn=Instance.new("Frame",scrgui); tn.Name="tempnotif"
+        tn.AnchorPoint=Vector2.new(0.5,0.5); tn.BackgroundColor3=Color3.fromRGB(12,6,20)
+        tn.BackgroundTransparency=0.05; tn.Position=UDim2.new(1,280,0.079,0)
+        tn.Size=UDim2.new(0,447,0,117); tn.ZIndex=4
+        Instance.new("UICorner",tn).CornerRadius=UDim.new(0,18)
+        local tnStroke=Instance.new("UIStroke",tn); tnStroke.Color=C.accent
+        tnStroke.Thickness=1.5; tnStroke.ZIndex=5
+        local tnShadow=Instance.new("ImageLabel",tn); tnShadow.AnchorPoint=Vector2.new(0.5,0.5)
+        tnShadow.BackgroundTransparency=1; tnShadow.Position=UDim2.new(0.5,0,0.5,0)
+        tnShadow.Size=UDim2.new(1.18,0,1.28,0); tnShadow.ZIndex=3
+        tnShadow.Image="rbxassetid://313486536"; tnShadow.ImageColor3=C.accent
+        tnShadow.ImageTransparency=0.58
 
-        local tn = Instance.new("Frame", scrgui)
-        tn.Name = "tempnotif"
-        tn.AnchorPoint = Vector2.new(0.5, 0.5)
-        tn.BackgroundColor3 = Color3.fromRGB(12, 6, 20)
-        tn.BackgroundTransparency = 0.05
-        tn.Position = UDim2.new(1, 280, 0.079, 0)
-        tn.Size = UDim2.new(0, 447, 0, 117)
-        tn.ZIndex = 4
-        Instance.new("UICorner", tn).CornerRadius = UDim.new(0, 18)
+        local tnIcon=Instance.new("ImageLabel",tn); tnIcon.BackgroundTransparency=1
+        tnIcon.Position=UDim2.new(0.031,0,0.13,0); tnIcon.Size=UDim2.new(0,80,0,80)
+        tnIcon.ZIndex=4; tnIcon.Image=LOGO_ID
+        tnIcon.ScaleType=Enum.ScaleType.Fit
 
-        local tnStroke = Instance.new("UIStroke", tn)
-        tnStroke.Color = C.accent
-        tnStroke.Thickness = 1.5
-        tnStroke.ZIndex = 5
-
-        local tnShadow = Instance.new("ImageLabel", tn)
-        tnShadow.AnchorPoint = Vector2.new(0.5, 0.5)
-        tnShadow.BackgroundTransparency = 1
-        tnShadow.Position = UDim2.new(0.5, 0, 0.5, 0)
-        tnShadow.Size = UDim2.new(1.18, 0, 1.28, 0)
-        tnShadow.ZIndex = 3
-        tnShadow.Image = "rbxassetid://313486536"
-        tnShadow.ImageColor3 = C.accent
-        tnShadow.ImageTransparency = 0.58
-
-        local tnIcon = Instance.new("ImageLabel", tn)
-        tnIcon.Position = UDim2.new(0.031, 0, 0.13, 0)
-        tnIcon.Size = UDim2.new(0, 80, 0, 80)
-        tnIcon.ZIndex = 4
-        applyLogo(tnIcon, RAW_LOGO_ID)
-
-        local tnT1 = Instance.new("TextLabel", tn)
-        tnT1.BackgroundTransparency = 1
-        tnT1.Position = UDim2.new(0.234, 0, 0.1, 0)
-        tnT1.Size = UDim2.new(0, 327, 0, 28)
-        tnT1.ZIndex = 4
-        tnT1.Font = Enum.Font.GothamBold
-        tnT1.Text = text1 or ""
-        tnT1.TextColor3 = C.text
-        tnT1.TextSize = 24
-        tnT1.TextXAlignment = Enum.TextXAlignment.Left
-
-        Instance.new("UIGradient", tnT1).Color = ColorSequence.new{
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(240, 190, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(140, 60, 220))
+        local tnT1=Instance.new("TextLabel",tn); tnT1.BackgroundTransparency=1
+        tnT1.Position=UDim2.new(0.234,0,0.1,0); tnT1.Size=UDim2.new(0,327,0,28)
+        tnT1.ZIndex=4; tnT1.Font=Enum.Font.GothamBold; tnT1.Text=text1 or ""
+        tnT1.TextColor3=C.text; tnT1.TextSize=24; tnT1.TextXAlignment=Enum.TextXAlignment.Left
+        Instance.new("UIGradient",tnT1).Color=ColorSequence.new{
+            ColorSequenceKeypoint.new(0,Color3.fromRGB(240,190,255)),
+            ColorSequenceKeypoint.new(1,Color3.fromRGB(140,60,220))
         }
 
-        local tnT2 = Instance.new("TextLabel", tn)
-        tnT2.BackgroundTransparency = 1
-        tnT2.Position = UDim2.new(0.236, 0, 0.52, 0)
-        tnT2.Size = UDim2.new(0, 326, 0, 48)
-        tnT2.ZIndex = 4
-        tnT2.Font = Enum.Font.Gotham
-        tnT2.Text = text2 or ""
-        tnT2.TextColor3 = C.subtext
-        tnT2.TextSize = 15
-        tnT2.TextWrapped = true
-        tnT2.TextXAlignment = Enum.TextXAlignment.Left
-        tnT2.TextYAlignment = Enum.TextYAlignment.Top
+        local tnT2=Instance.new("TextLabel",tn); tnT2.BackgroundTransparency=1
+        tnT2.Position=UDim2.new(0.236,0,0.52,0); tnT2.Size=UDim2.new(0,326,0,48)
+        tnT2.ZIndex=4; tnT2.Font=Enum.Font.Gotham; tnT2.Text=text2 or ""
+        tnT2.TextColor3=C.subtext; tnT2.TextSize=15; tnT2.TextWrapped=true
+        tnT2.TextXAlignment=Enum.TextXAlignment.Left; tnT2.TextYAlignment=Enum.TextYAlignment.Top
 
-        pulseStroke(tnStroke, 1, 2.4, 0.65)
-        tp(tn, UDim2.new(1, -250, 0.079, 0), 0.42, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
-        playSound(POPUP_SND, 0.45, 1)
-
-        task.delay(4.4, function()
+        pulseStroke(tnStroke,1,2.4,0.65)
+        tp(tn,UDim2.new(1,-250,0.079,0),0.42,Enum.EasingStyle.Back,Enum.EasingDirection.Out)
+        playSound(POPUP_SND,0.45,1)
+        task.delay(4.4,function()
             pcall(function()
                 if tn and tn.Parent then
-                    tp(tn, tn.Position + UDim2.new(0, 540, 0, 0), 0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In)
-                    Debris:AddItem(tn, 0.4)
+                    tp(tn,tn.Position+UDim2.new(0,540,0,0),0.3,Enum.EasingStyle.Quart,Enum.EasingDirection.In)
+                    Debris:AddItem(tn,0.4)
                 end
             end)
         end)
     end
 
-    function window:Notify(txt1, txt2, b1, icohn, callback)
-        if notif.Visible or notif2.Visible then
-            return
-        end
-
-        notiftitle.Text = txt1 or ""
-        notiftext.Text = txt2 or ""
-        notifbtn1.Text = b1 or "OK"
-
-        if icohn and tostring(icohn) ~= "" then
-            applyLogo(notificon, icohn, C.accent)
-        else
-            applyLogo(notificon, RAW_LOGO_ID, C.accent)
-        end
-
-        if con1 then
-            pcall(function()
-                con1:Disconnect()
-            end)
-            con1 = nil
-        end
-
+    function window:Notify(txt1,txt2,b1,icohn,callback)
+        if notif.Visible or notif2.Visible then return end
+        notiftitle.Text=txt1 or ""; notiftext.Text=txt2 or ""
+        notificon.Image=LOGO_ID; notifbtn1.Text=b1 or "OK"
+        if con1 then pcall(function() con1:Disconnect() end) con1=nil end
         revealModal(notif)
-
-        con1 = notifbtn1.MouseButton1Click:Connect(function()
-            pcall(function()
-                con1:Disconnect()
-            end)
-            con1 = nil
-            hideModal(notif)
-            if callback then
-                pcall(callback)
-            end
+        con1=notifbtn1.MouseButton1Click:Connect(function()
+            pcall(function() con1:Disconnect() end) con1=nil
+            hideModal(notif); if callback then pcall(callback) end
         end)
     end
 
-    function window:Notify2(txt1, txt2, b1, b2, icohn, callback, callback2)
-        if notif.Visible or notif2.Visible then
-            return
-        end
-
-        notif2title.Text = txt1 or ""
-        notif2text.Text = txt2 or ""
-        notif2btn1.Text = b1 or "Yes"
-        notif2btn2.Text = b2 or "No"
-
-        if icohn and tostring(icohn) ~= "" then
-            applyLogo(notif2icon, icohn, C.accent)
-        else
-            applyLogo(notif2icon, RAW_LOGO_ID, C.accent)
-        end
-
-        if con1 then
-            pcall(function()
-                con1:Disconnect()
-            end)
-            con1 = nil
-        end
-
-        if con2 then
-            pcall(function()
-                con2:Disconnect()
-            end)
-            con2 = nil
-        end
-
+    function window:Notify2(txt1,txt2,b1,b2,icohn,callback,callback2)
+        if notif.Visible or notif2.Visible then return end
+        notif2title.Text=txt1 or ""; notif2text.Text=txt2 or ""
+        notif2icon.Image=LOGO_ID; notif2btn1.Text=b1 or "Yes"; notif2btn2.Text=b2 or "No"
+        if con1 then pcall(function() con1:Disconnect() end) con1=nil end
+        if con2 then pcall(function() con2:Disconnect() end) con2=nil end
         revealModal(notif2)
-
-        con1 = notif2btn1.MouseButton1Click:Connect(function()
-            pcall(function()
-                con1:Disconnect()
-            end)
-            con1 = nil
-            pcall(function()
-                con2:Disconnect()
-            end)
-            con2 = nil
-            hideModal(notif2)
-            if callback then
-                pcall(callback)
-            end
+        con1=notif2btn1.MouseButton1Click:Connect(function()
+            pcall(function() con1:Disconnect() end) con1=nil
+            pcall(function() con2:Disconnect() end) con2=nil
+            hideModal(notif2); if callback then pcall(callback) end
         end)
-
-        con2 = notif2btn2.MouseButton1Click:Connect(function()
-            pcall(function()
-                con1:Disconnect()
-            end)
-            con1 = nil
-            pcall(function()
-                con2:Disconnect()
-            end)
-            con2 = nil
-            hideModal(notif2)
-            if callback2 then
-                pcall(callback2)
-            end
+        con2=notif2btn2.MouseButton1Click:Connect(function()
+            pcall(function() con1:Disconnect() end) con1=nil
+            pcall(function() con2:Disconnect() end) con2=nil
+            hideModal(notif2); if callback2 then pcall(callback2) end
         end)
     end
 
-        function window:Divider(name)
-        local div = Instance.new("TextLabel", sidebar)
-        div.BackgroundTransparency = 1
-        div.Size = UDim2.new(0, 226, 0, 26)
-        div.Font = Enum.Font.GothamBold
-        div.Text = "◈  " .. (name or "")
-        div.TextColor3 = C.subtext
-        div.TextSize = 13
-        div.TextWrapped = true
-        div.TextXAlignment = Enum.TextXAlignment.Left
-        div.TextYAlignment = Enum.TextYAlignment.Bottom
+    function window:Divider(name)
+        local div=Instance.new("TextLabel",sidebar); div.BackgroundTransparency=1
+        div.Size=UDim2.new(0,226,0,26); div.Font=Enum.Font.GothamBold
+        div.Text="◈  "..(name or ""); div.TextColor3=C.subtext; div.TextSize=13
+        div.TextWrapped=true; div.TextXAlignment=Enum.TextXAlignment.Left
+        div.TextYAlignment=Enum.TextYAlignment.Bottom
     end
 
     function window:Section(name)
-        local sideBtn = Instance.new("TextButton", sidebar)
-        sideBtn.BackgroundColor3 = C.accent
-        sideBtn.BackgroundTransparency = 1
-        sideBtn.Size = UDim2.new(0, 226, 0, 37)
-        sideBtn.ZIndex = 2
-        sideBtn.AutoButtonColor = false
-        sideBtn.Font = Enum.Font.GothamBold
-        sideBtn.Text = "  " .. (name or "")
-        sideBtn.TextColor3 = C.subtext
-        sideBtn.TextSize = 17
-        sideBtn.TextXAlignment = Enum.TextXAlignment.Left
-        sideBtn.ClipsDescendants = true
-        Instance.new("UICorner", sideBtn).CornerRadius = UDim.new(0, 9)
-
-        table.insert(sections, sideBtn)
-
-        local sideStroke = Instance.new("UIStroke", sideBtn)
-        sideStroke.Color = C.accent
-        sideStroke.Thickness = 1
-        sideStroke.Transparency = 1
-
-        local indicator = Instance.new("Frame", sideBtn)
-        indicator.Name = "Indicator"
-        indicator.AnchorPoint = Vector2.new(0, 0.5)
-        indicator.BackgroundColor3 = C.white
-        indicator.BorderSizePixel = 0
-        indicator.Position = UDim2.new(0, 8, 0.5, 0)
-        indicator.Size = UDim2.new(0, 0, 0, 20)
-        Instance.new("UICorner", indicator).CornerRadius = UDim.new(1, 0)
-
+        local sideBtn=Instance.new("TextButton",sidebar)
+        sideBtn.BackgroundColor3=C.accent; sideBtn.BackgroundTransparency=1
+        sideBtn.Size=UDim2.new(0,226,0,37); sideBtn.ZIndex=2; sideBtn.AutoButtonColor=false
+        sideBtn.Font=Enum.Font.GothamBold; sideBtn.Text="  "..(name or "")
+        sideBtn.TextColor3=C.subtext; sideBtn.TextSize=17
+        sideBtn.TextXAlignment=Enum.TextXAlignment.Left; sideBtn.ClipsDescendants=true
+        Instance.new("UICorner",sideBtn).CornerRadius=UDim.new(0,9)
+        table.insert(sections,sideBtn)
+        local sideStroke=Instance.new("UIStroke",sideBtn); sideStroke.Color=C.accent
+        sideStroke.Thickness=1; sideStroke.Transparency=1
+        local indicator=Instance.new("Frame",sideBtn); indicator.Name="Indicator"
+        indicator.AnchorPoint=Vector2.new(0,0.5); indicator.BackgroundColor3=C.white
+        indicator.BorderSizePixel=0; indicator.Position=UDim2.new(0,8,0.5,0)
+        indicator.Size=UDim2.new(0,0,0,20)
+        Instance.new("UICorner",indicator).CornerRadius=UDim.new(1,0)
         attachShine(sideBtn)
-
         sideBtn.MouseEnter:Connect(function()
-            if sideBtn.BackgroundTransparency ~= 0.08 then
-                tween(sideBtn, {BackgroundTransparency = 0.7}, 0.2)
-            end
+            if sideBtn.BackgroundTransparency~=0.08 then tween(sideBtn,{BackgroundTransparency=0.7},0.2) end
         end)
-
         sideBtn.MouseLeave:Connect(function()
-            if sideBtn.BackgroundTransparency ~= 0.08 then
-                tween(sideBtn, {BackgroundTransparency = 1}, 0.2)
-            end
+            if sideBtn.BackgroundTransparency~=0.08 then tween(sideBtn,{BackgroundTransparency=1},0.2) end
         end)
 
-        local wam = Instance.new("ScrollingFrame", workarea)
-        wam.Active = true
-        wam.BackgroundTransparency = 1
-        wam.BorderSizePixel = 0
-        wam.Position = UDim2.new(0.039, 0, 0.118, 0)
-        wam.Size = UDim2.new(0, 422, 0, 490)
-        wam.ZIndex = 3
-        wam.CanvasSize = UDim2.new(0, 0, 0, 0)
-        wam.AutomaticCanvasSize = "Y"
-        wam.ScrollBarThickness = 2
-        wam.ScrollBarImageColor3 = C.accent
-        wam.Visible = false
+        local wam=Instance.new("ScrollingFrame",workarea); wam.Active=true
+        wam.BackgroundTransparency=1; wam.BorderSizePixel=0
+        wam.Position=UDim2.new(0.039,0,0.118,0); wam.Size=UDim2.new(0,422,0,490)
+        wam.ZIndex=3; wam.CanvasSize=UDim2.new(0,0,0,0); wam.AutomaticCanvasSize="Y"
+        wam.ScrollBarThickness=2; wam.ScrollBarImageColor3=C.accent; wam.Visible=false
+        local wl=Instance.new("UIListLayout",wam); wl.HorizontalAlignment=Enum.HorizontalAlignment.Center
+        wl.SortOrder=Enum.SortOrder.LayoutOrder; wl.Padding=UDim.new(0,5)
+        table.insert(workareas,wam)
 
-        local wl = Instance.new("UIListLayout", wam)
-        wl.HorizontalAlignment = Enum.HorizontalAlignment.Center
-        wl.SortOrder = Enum.SortOrder.LayoutOrder
-        wl.Padding = UDim.new(0, 5)
-
-        table.insert(workareas, wam)
-
-        local sec = {}
+        local sec={}
 
         function sec:Select()
-            for _, v in next, sections do
-                tween(v, {BackgroundTransparency = 1, TextColor3 = C.subtext}, 0.18)
-
-                local ind = v:FindFirstChild("Indicator")
-                if ind then
-                    tween(ind, {Size = UDim2.new(0, 0, 0, 20)}, 0.18)
-                end
-
-                local st = v:FindFirstChildOfClass("UIStroke")
-                if st then
-                    tween(st, {Transparency = 1}, 0.18)
-                end
+            for _,v in next,sections do
+                tween(v,{BackgroundTransparency=1,TextColor3=C.subtext},0.18)
+                local ind=v:FindFirstChild("Indicator")
+                if ind then tween(ind,{Size=UDim2.new(0,0,0,20)},0.18) end
+                local st=v:FindFirstChildOfClass("UIStroke")
+                if st then tween(st,{Transparency=1},0.18) end
             end
-
-            tween(sideBtn, {BackgroundTransparency = 0.08, TextColor3 = C.white}, 0.18)
-            tween(indicator, {Size = UDim2.new(0, 4, 0, 20)}, 0.18)
-            tween(sideStroke, {Transparency = 0.35}, 0.18)
-
-            if currentWorkarea and currentWorkarea ~= wam then
-                local oldW = currentWorkarea
-                tween(oldW, {Position = UDim2.new(-0.05, 0, 0.118, 0)}, 0.16)
-
-                task.delay(0.17, function()
+            tween(sideBtn,{BackgroundTransparency=0.08,TextColor3=C.white},0.18)
+            tween(indicator,{Size=UDim2.new(0,4,0,20)},0.18)
+            tween(sideStroke,{Transparency=0.35},0.18)
+            if currentWorkarea and currentWorkarea~=wam then
+                local oldW=currentWorkarea
+                tween(oldW,{Position=UDim2.new(-0.05,0,0.118,0)},0.16)
+                task.delay(0.17,function()
                     pcall(function()
-                        if oldW and oldW.Parent and oldW ~= wam then
-                            oldW.Visible = false
-                            oldW.Position = UDim2.new(0.039, 0, 0.118, 0)
+                        if oldW and oldW.Parent and oldW~=wam then
+                            oldW.Visible=false; oldW.Position=UDim2.new(0.039,0,0.118,0)
                         end
                     end)
                 end)
             end
-
-            wam.Position = UDim2.new(0.09, 0, 0.118, 0)
-            wam.Visible = true
-            tween(wam, {Position = UDim2.new(0.039, 0, 0.118, 0)}, 0.22)
-            currentWorkarea = wam
-            playSound(POPUP_SND, 0.25, 1.2)
+            wam.Position=UDim2.new(0.09,0,0.118,0); wam.Visible=true
+            tween(wam,{Position=UDim2.new(0.039,0,0.118,0)},0.22)
+            currentWorkarea=wam
+            playSound(POPUP_SND,0.25,1.2)
         end
 
-        function sec:Divider(name2)
-            local div = Instance.new("TextLabel", wam)
-            div.BackgroundTransparency = 1
-            div.Size = UDim2.new(0, 418, 0, 45)
-            div.Font = Enum.Font.GothamBold
-            div.Text = name2 or ""
-            div.TextColor3 = C.text
-            div.TextSize = 21
-            div.TextWrapped = true
-            div.TextXAlignment = Enum.TextXAlignment.Left
-            div.TextYAlignment = Enum.TextYAlignment.Bottom
-
-            local dl = Instance.new("Frame", div)
-            dl.BackgroundColor3 = C.accentDark
-            dl.BorderSizePixel = 0
-            dl.Position = UDim2.new(0, 0, 1, -2)
-            dl.Size = UDim2.new(1, 0, 0, 1)
+        function sec:Divider(name)
+            local div=Instance.new("TextLabel",wam); div.BackgroundTransparency=1
+            div.Size=UDim2.new(0,418,0,45); div.Font=Enum.Font.GothamBold; div.Text=name or ""
+            div.TextColor3=C.text; div.TextSize=21; div.TextWrapped=true
+            div.TextXAlignment=Enum.TextXAlignment.Left; div.TextYAlignment=Enum.TextYAlignment.Bottom
+            local dl=Instance.new("Frame",div); dl.BackgroundColor3=C.accentDark
+            dl.BorderSizePixel=0; dl.Position=UDim2.new(0,0,1,-2); dl.Size=UDim2.new(1,0,0,1)
         end
 
-        function sec:Button(name2, callback)
-            local btn = Instance.new("TextButton", wam)
-            btn.BackgroundColor3 = C.button
-            btn.Size = UDim2.new(0, 418, 0, 42)
-            btn.ZIndex = 2
-            btn.Font = Enum.Font.GothamBold
-            btn.Text = name2 or ""
-            btn.TextColor3 = C.text
-            btn.TextSize = 17
-            btn.AutoButtonColor = false
-            btn.ClipsDescendants = true
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
-
-            local bst = Instance.new("UIStroke", btn)
-            bst.Color = C.accentDark
-            bst.Thickness = 1
-
-            local bsc = Instance.new("UIScale", btn)
-            bsc.Scale = 1
-
-            local glow = Instance.new("ImageLabel", btn)
-            glow.AnchorPoint = Vector2.new(0.5, 0.5)
-            glow.BackgroundTransparency = 1
-            glow.Position = UDim2.new(0.5, 0, 0.5, 0)
-            glow.Size = UDim2.new(1.15, 0, 2.2, 0)
-            glow.Image = "rbxassetid://313486536"
-            glow.ImageColor3 = C.accent
-            glow.ImageTransparency = 0.92
-            glow.ZIndex = 1
-
+        function sec:Button(name, callback)
+            local btn=Instance.new("TextButton",wam); btn.BackgroundColor3=C.button
+            btn.Size=UDim2.new(0,418,0,42); btn.ZIndex=2; btn.Font=Enum.Font.GothamBold
+            btn.Text=name or ""; btn.TextColor3=C.text; btn.TextSize=17
+            btn.AutoButtonColor=false; btn.ClipsDescendants=true
+            Instance.new("UICorner",btn).CornerRadius=UDim.new(0,10)
+            local bst=Instance.new("UIStroke",btn); bst.Color=C.accentDark; bst.Thickness=1
+            local bsc=Instance.new("UIScale",btn); bsc.Scale=1
+            local glow=Instance.new("ImageLabel",btn); glow.AnchorPoint=Vector2.new(0.5,0.5)
+            glow.BackgroundTransparency=1; glow.Position=UDim2.new(0.5,0,0.5,0)
+            glow.Size=UDim2.new(1.15,0,2.2,0); glow.Image="rbxassetid://313486536"
+            glow.ImageColor3=C.accent; glow.ImageTransparency=0.92; glow.ZIndex=1
             attachShine(btn)
-
             btn.MouseEnter:Connect(function()
-                tween(btn, {BackgroundColor3 = C.accentDark}, 0.18)
-                tween(bst, {Color = C.accent}, 0.18)
-                tween(glow, {ImageTransparency = 0.82}, 0.18)
+                tween(btn,{BackgroundColor3=C.accentDark},0.18)
+                tween(bst,{Color=C.accent},0.18); tween(glow,{ImageTransparency=0.82},0.18)
             end)
-
             btn.MouseLeave:Connect(function()
-                tween(btn, {BackgroundColor3 = C.button}, 0.18)
-                tween(bst, {Color = C.accentDark}, 0.18)
-                tween(glow, {ImageTransparency = 0.92}, 0.18)
-                spring(bsc, {Scale = 1}, 0.12)
+                tween(btn,{BackgroundColor3=C.button},0.18)
+                tween(bst,{Color=C.accentDark},0.18); tween(glow,{ImageTransparency=0.92},0.18)
+                spring(bsc,{Scale=1},0.12)
             end)
-
-            btn.MouseButton1Down:Connect(function()
-                tween(bsc, {Scale = 0.984}, 0.06, Enum.EasingStyle.Quad)
-            end)
-
-            btn.MouseButton1Up:Connect(function()
-                spring(bsc, {Scale = 1}, 0.14)
-            end)
-
+            btn.MouseButton1Down:Connect(function() tween(bsc,{Scale=0.984},0.06,Enum.EasingStyle.Quad) end)
+            btn.MouseButton1Up:Connect(function() spring(bsc,{Scale=1},0.14) end)
             if callback then
                 btn.MouseButton1Click:Connect(function()
                     pcall(function()
-                        local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
-                        local rx = Mouse.X - btn.AbsolutePosition.X
-                        local ry = Mouse.Y - btn.AbsolutePosition.Y
-
-                        local ripple = Instance.new("Frame", btn)
-                        ripple.BackgroundColor3 = C.white
-                        ripple.BackgroundTransparency = 0.82
-                        ripple.BorderSizePixel = 0
-                        ripple.AnchorPoint = Vector2.new(0.5, 0.5)
-                        ripple.Position = UDim2.new(0, rx, 0, ry)
-                        ripple.Size = UDim2.new(0, 0, 0, 0)
-                        ripple.ZIndex = btn.ZIndex + 2
-                        Instance.new("UICorner", ripple).CornerRadius = UDim.new(1, 0)
-
-                        TweenService:Create(
-                            ripple,
-                            TweenInfo.new(0.55, Enum.EasingStyle.Quart, Enum.EasingDirection.Out),
-                            {
-                                Size = UDim2.new(0, btn.AbsoluteSize.X * 1.6, 0, btn.AbsoluteSize.X * 1.6),
-                                BackgroundTransparency = 1
-                            }
-                        ):Play()
-
-                        Debris:AddItem(ripple, 0.65)
+                        local Mouse=game:GetService("Players").LocalPlayer:GetMouse()
+                        local rx=Mouse.X-btn.AbsolutePosition.X
+                        local ry=Mouse.Y-btn.AbsolutePosition.Y
+                        local ripple=Instance.new("Frame",btn)
+                        ripple.BackgroundColor3=C.white; ripple.BackgroundTransparency=0.82
+                        ripple.BorderSizePixel=0; ripple.AnchorPoint=Vector2.new(0.5,0.5)
+                        ripple.Position=UDim2.new(0,rx,0,ry); ripple.Size=UDim2.new(0,0,0,0)
+                        ripple.ZIndex=btn.ZIndex+2
+                        Instance.new("UICorner",ripple).CornerRadius=UDim.new(1,0)
+                        TweenService:Create(ripple,TweenInfo.new(0.55,Enum.EasingStyle.Quart,Enum.EasingDirection.Out),{
+                            Size=UDim2.new(0,btn.AbsoluteSize.X*1.6,0,btn.AbsoluteSize.X*1.6),
+                            BackgroundTransparency=1
+                        }):Play()
+                        Debris:AddItem(ripple,0.65)
                     end)
-
-                    playSound(POPUP_SND, 0.3, 1.05)
-                    tween(btn, {TextTransparency = 0.4}, 0.05)
-                    task.wait(0.05)
-                    tween(btn, {TextTransparency = 0}, 0.08)
-                    pcall(callback)
+                    playSound(POPUP_SND,0.3,1.05)
+                    tween(btn,{TextTransparency=0.4},0.05); task.wait(0.05)
+                    tween(btn,{TextTransparency=0},0.08); pcall(callback)
                 end)
             end
         end
 
-        function sec:Label(name2)
-            local lbl = Instance.new("TextLabel", wam)
-            lbl.BackgroundTransparency = 1
-            lbl.Size = UDim2.new(0, 418, 0, 34)
-            lbl.Font = Enum.Font.Gotham
-            lbl.TextColor3 = C.subtext
-            lbl.TextSize = 17
-            lbl.TextWrapped = true
-            lbl.Text = "  " .. (name2 or "")
-            lbl.TextXAlignment = Enum.TextXAlignment.Left
+        function sec:Label(name)
+            local lbl=Instance.new("TextLabel",wam); lbl.BackgroundTransparency=1
+            lbl.Size=UDim2.new(0,418,0,34); lbl.Font=Enum.Font.Gotham
+            lbl.TextColor3=C.subtext; lbl.TextSize=17; lbl.TextWrapped=true
+            lbl.Text="  "..(name or ""); lbl.TextXAlignment=Enum.TextXAlignment.Left
         end
 
-        function sec:Switch(name2, defaultmode, callback)
-            local mode = defaultmode or false
-
-            local row = Instance.new("TextLabel", wam)
-            row.BackgroundColor3 = C.button
-            row.Size = UDim2.new(0, 418, 0, 42)
-            row.Font = Enum.Font.GothamBold
-            row.Text = "  " .. (name2 or "")
-            row.TextColor3 = C.text
-            row.TextSize = 17
-            row.TextWrapped = true
-            row.TextXAlignment = Enum.TextXAlignment.Left
-            Instance.new("UICorner", row).CornerRadius = UDim.new(0, 9)
-
-            local track = Instance.new("TextButton", row)
-            track.Position = UDim2.new(0.832, 0, 0.12, 0)
-            track.Size = UDim2.new(0, 70, 0, 32)
-            track.Text = ""
-            track.AutoButtonColor = false
-            Instance.new("UICorner", track).CornerRadius = UDim.new(5, 0)
-
-            local thumb = Instance.new("TextButton", track)
-            thumb.BackgroundColor3 = C.white
-            thumb.Size = UDim2.new(0, 30, 0, 30)
-            thumb.AutoButtonColor = false
-            thumb.Text = ""
-            Instance.new("UICorner", thumb).CornerRadius = UDim.new(5, 0)
-
+        function sec:Switch(name, defaultmode, callback)
+            local mode=defaultmode or false
+            local row=Instance.new("TextLabel",wam); row.BackgroundColor3=C.button
+            row.Size=UDim2.new(0,418,0,42); row.Font=Enum.Font.GothamBold
+            row.Text="  "..(name or ""); row.TextColor3=C.text; row.TextSize=17
+            row.TextWrapped=true; row.TextXAlignment=Enum.TextXAlignment.Left
+            Instance.new("UICorner",row).CornerRadius=UDim.new(0,9)
+            local track=Instance.new("TextButton",row); track.Position=UDim2.new(0.832,0,0.12,0)
+            track.Size=UDim2.new(0,70,0,32); track.Text=""; track.AutoButtonColor=false
+            Instance.new("UICorner",track).CornerRadius=UDim.new(5,0)
+            local thumb=Instance.new("TextButton",track); thumb.BackgroundColor3=C.white
+            thumb.Size=UDim2.new(0,30,0,30); thumb.AutoButtonColor=false; thumb.Text=""
+            Instance.new("UICorner",thumb).CornerRadius=UDim.new(5,0)
             local function updateSwitch()
                 if mode then
-                    thumb:TweenPosition(UDim2.new(0, 39, 0, 1), "In", "Sine", 0.15, true)
-                    tween(track, {BackgroundColor3 = C.accent}, 0.15)
+                    thumb:TweenPosition(UDim2.new(0,39,0,1),"In","Sine",0.15,true)
+                    tween(track,{BackgroundColor3=C.accent},0.15)
                 else
-                    thumb:TweenPosition(UDim2.new(0, 1, 0, 1), "In", "Sine", 0.15, true)
-                    tween(track, {BackgroundColor3 = Color3.fromRGB(50, 30, 70)}, 0.15)
+                    thumb:TweenPosition(UDim2.new(0,1,0,1),"In","Sine",0.15,true)
+                    tween(track,{BackgroundColor3=Color3.fromRGB(50,30,70)},0.15)
                 end
             end
-
             updateSwitch()
-
             local function toggle()
-                mode = not mode
-                updateSwitch()
-                playSound(POPUP_SND, 0.25, mode and 1.2 or 0.9)
-                if callback then
-                    pcall(callback, mode)
-                end
+                mode=not mode; updateSwitch()
+                playSound(POPUP_SND,0.25,mode and 1.2 or 0.9)
+                if callback then pcall(callback,mode) end
             end
-
             track.MouseButton1Click:Connect(toggle)
             thumb.MouseButton1Click:Connect(toggle)
         end
 
-        function sec:TextField(name2, placeholder, callback)
-            local row = Instance.new("TextLabel", wam)
-            row.BackgroundColor3 = C.button
-            row.Size = UDim2.new(0, 418, 0, 42)
-            row.Font = Enum.Font.GothamBold
-            row.Text = "  " .. (name2 or "")
-            row.TextColor3 = C.text
-            row.TextSize = 17
-            row.TextWrapped = true
-            row.TextXAlignment = Enum.TextXAlignment.Left
-            Instance.new("UICorner", row).CornerRadius = UDim.new(0, 9)
-
-            local inputBg = Instance.new("Frame", row)
-            inputBg.BackgroundColor3 = Color3.fromRGB(20, 10, 35)
-            inputBg.Position = UDim2.new(0.44, 0, 0.1, 0)
-            inputBg.Size = UDim2.new(0, 230, 0, 32)
-            Instance.new("UICorner", inputBg).CornerRadius = UDim.new(0, 9)
-
-            local inputStroke = Instance.new("UIStroke", inputBg)
-            inputStroke.Color = C.accentDark
-            inputStroke.Thickness = 1
-
-            local tb = Instance.new("TextBox", inputBg)
-            tb.BackgroundTransparency = 1
-            tb.ClipsDescendants = true
-            tb.Position = UDim2.new(0.04, 0, 0, 0)
-            tb.Size = UDim2.new(0.92, 0, 1, 0)
-            tb.ClearTextOnFocus = false
-            tb.Font = Enum.Font.Gotham
-            tb.PlaceholderColor3 = C.subtext
-            tb.PlaceholderText = placeholder or "Type..."
-            tb.Text = ""
-            tb.TextColor3 = C.text
-            tb.TextSize = 15
-            tb.TextXAlignment = Enum.TextXAlignment.Left
-
-            tb.Focused:Connect(function()
-                tween(inputStroke, {Color = C.accent}, 0.2)
-            end)
-
+        function sec:TextField(name, placeholder, callback)
+            local row=Instance.new("TextLabel",wam); row.BackgroundColor3=C.button
+            row.Size=UDim2.new(0,418,0,42); row.Font=Enum.Font.GothamBold
+            row.Text="  "..(name or ""); row.TextColor3=C.text; row.TextSize=17
+            row.TextWrapped=true; row.TextXAlignment=Enum.TextXAlignment.Left
+            Instance.new("UICorner",row).CornerRadius=UDim.new(0,9)
+            local inputBg=Instance.new("Frame",row); inputBg.BackgroundColor3=Color3.fromRGB(20,10,35)
+            inputBg.Position=UDim2.new(0.44,0,0.1,0); inputBg.Size=UDim2.new(0,230,0,32)
+            Instance.new("UICorner",inputBg).CornerRadius=UDim.new(0,9)
+            local inputStroke=Instance.new("UIStroke",inputBg); inputStroke.Color=C.accentDark; inputStroke.Thickness=1
+            local tb=Instance.new("TextBox",inputBg); tb.BackgroundTransparency=1
+            tb.ClipsDescendants=true; tb.Position=UDim2.new(0.04,0,0,0); tb.Size=UDim2.new(0.92,0,1,0)
+            tb.ClearTextOnFocus=false; tb.Font=Enum.Font.Gotham; tb.PlaceholderColor3=C.subtext
+            tb.PlaceholderText=placeholder or "Type..."; tb.Text=""; tb.TextColor3=C.text
+            tb.TextSize=15; tb.TextXAlignment=Enum.TextXAlignment.Left
+            tb.Focused:Connect(function() tween(inputStroke,{Color=C.accent},0.2) end)
             tb.FocusLost:Connect(function()
-                tween(inputStroke, {Color = C.accentDark}, 0.2)
-                if callback then
-                    pcall(callback, tb.Text)
-                end
+                tween(inputStroke,{Color=C.accentDark},0.2)
+                if callback then pcall(callback,tb.Text) end
             end)
         end
 
-        sideBtn.MouseButton1Click:Connect(function()
-            sec:Select()
-        end)
-
+        sideBtn.MouseButton1Click:Connect(function() sec:Select() end)
         return sec
     end
 
